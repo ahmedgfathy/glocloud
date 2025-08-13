@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { SessionProvider } from './providers/SessionProvider'
+import Footer from '@/components/Footer'
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -14,9 +15,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
+      <body className="min-h-screen flex flex-col">
         <SessionProvider>
-          {children}
+          <div className="flex-1 flex flex-col">
+            {children}
+          </div>
+          <Footer />
         </SessionProvider>
       </body>
     </html>

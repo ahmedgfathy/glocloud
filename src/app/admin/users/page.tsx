@@ -9,8 +9,7 @@ import {
   PencilIcon, 
   TrashIcon,
   ShieldCheckIcon,
-  ShieldExclamationIcon,
-  ExclamationTriangleIcon
+  ShieldExclamationIcon
 } from '@heroicons/react/24/outline'
 import Sidebar from '@/components/Sidebar'
 
@@ -30,8 +29,7 @@ export default function AdminUsersPage() {
   const router = useRouter()
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
-  const [selectedUser, setSelectedUser] = useState<User | null>(null)
-  const [showEditModal, setShowEditModal] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -51,21 +49,20 @@ export default function AdminUsersPage() {
 
   const fetchUsers = async () => {
     try {
+      setError(null)
       const response = await fetch('/api/users')
       if (response.ok) {
         const data = await response.json()
-        setUsers(data)
+        setUsers(data || [])
+      } else {
+        setError('Failed to fetch users')
       }
     } catch (error) {
       console.error('Error fetching users:', error)
+      setError('Error fetching users')
     } finally {
       setLoading(false)
     }
-  }
-
-  const handleEditUser = (user: User) => {
-    setSelectedUser(user)
-    setShowEditModal(true)
   }
 
   const handleDeleteUser = async (userId: string) => {
@@ -78,40 +75,42 @@ export default function AdminUsersPage() {
 
       if (response.ok) {
         setUsers(users.filter(user => user.id !== userId))
+      } else {
+        setError('Failed to delete user')
       }
     } catch (error) {
       console.error('Error deleting user:', error)
+      setError('Error deleting user')
     }
   }
 
-  const getRoleBadge = (role: string) => {
-    const roleClasses = {
-      SUPER_ADMIN: 'bg-red-100 text-red-800',
-      ADMIN: 'bg-blue-100 text-blue-800',
-      EMPLOYEE: 'bg-green-100 text-green-800'
+  const getRoleBadgeColor = (role: string) => {
+    switch (role) {
+      case 'SUPER_ADMIN':
+        return 'bg-gradient-to-r from-red-500 to-pink-600'
+      case 'ADMIN':
+        return 'bg-gradient-to-r from-blue-500 to-purple-600'
+      case 'EMPLOYEE':
+        return 'bg-gradient-to-r from-green-500 to-emerald-600'
+      default:
+        return 'bg-gradient-to-r from-gray-500 to-gray-600'
     }
-
-    return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${roleClasses[role as keyof typeof roleClasses]}`}>
-        {role === 'SUPER_ADMIN' && <ShieldExclamationIcon className="h-3 w-3 mr-1" />}
-        {role === 'ADMIN' && <ShieldCheckIcon className="h-3 w-3 mr-1" />}
-        {role === 'EMPLOYEE' && <UserIcon className="h-3 w-3 mr-1" />}
-        {role.replace('_', ' ')}
-      </span>
-    )
   }
 
-  const getStatusBadge = (isActive: boolean) => {
-    return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-        isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-      }`}>
-        {isActive ? 'Active' : 'Inactive'}
-      </span>
-    )
+  const getRoleIcon = (role: string) => {
+    switch (role) {
+      case 'SUPER_ADMIN':
+        return <ShieldExclamationIcon className="h-3 w-3 mr-1" />
+      case 'ADMIN':
+        return <ShieldCheckIcon className="h-3 w-3 mr-1" />
+      case 'EMPLOYEE':
+        return <UserIcon className="h-3 w-3 mr-1" />
+      default:
+        return null
+    }
   }
 
-  if (status === 'loading' || loading) {
+  if (status === 'loading') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
         <Sidebar />
@@ -125,8 +124,8 @@ export default function AdminUsersPage() {
   }
 
   const totalUsers = users.length
-  const activeUsers = users.filter(user => user.isActive)
-  const adminUsers = users.filter(user => user.role === 'ADMIN' || user.role === 'SUPER_ADMIN')
+  const activeUsers = users.filter(user => user.isActive).length
+  const adminUsers = users.filter(user => user.role === 'ADMIN' || user.role === 'SUPER_ADMIN').length
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -149,6 +148,13 @@ export default function AdminUsersPage() {
               </div>
             </div>
           </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
+              {error}
+            </div>
+          )}
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -175,7 +181,7 @@ export default function AdminUsersPage() {
                 </div>
                 <div className="ml-4">
                   <h3 className="text-lg font-semibold text-gray-900">Active Users</h3>
-                  <p className="text-2xl font-bold text-green-600">{activeUsers.length}</p>
+                  <p className="text-2xl font-bold text-green-600">{activeUsers}</p>
                 </div>
               </div>
             </div>
@@ -189,7 +195,7 @@ export default function AdminUsersPage() {
                 </div>
                 <div className="ml-4">
                   <h3 className="text-lg font-semibold text-gray-900">Administrators</h3>
-                  <p className="text-2xl font-bold text-purple-600">{adminUsers.length}</p>
+                  <p className="text-2xl font-bold text-purple-600">{adminUsers}</p>
                 </div>
               </div>
             </div>
@@ -207,83 +213,101 @@ export default function AdminUsersPage() {
               </div>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-8 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                      User
-                    </th>
-                    <th className="px-8 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                      Role
-                    </th>
-                    <th className="px-8 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-8 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                      Type
-                    </th>
-                    <th className="px-8 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                      Created
-                    </th>
-                    <th className="px-8 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {users.map((user) => (
-                    <tr key={user.id} className="hover:bg-gray-50 transition-colors duration-200">
-                      <td className="px-8 py-6 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="flex-shrink-0 h-12 w-12">
-                            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center shadow-lg">
-                              <UserIcon className="h-6 w-6 text-white" />
+            {loading ? (
+              <div className="p-8 text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
+                <p className="mt-4 text-gray-500">Loading users...</p>
+              </div>
+            ) : users.length === 0 ? (
+              <div className="p-8 text-center">
+                <UserIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-500">No users found</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-8 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        User
+                      </th>
+                      <th className="px-8 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        Role
+                      </th>
+                      <th className="px-8 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="px-8 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        Type
+                      </th>
+                      <th className="px-8 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        Created
+                      </th>
+                      <th className="px-8 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {users.map((user) => (
+                      <tr key={user.id} className="hover:bg-gray-50 transition-colors duration-200">
+                        <td className="px-8 py-6 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="flex-shrink-0 h-12 w-12">
+                              <div className="h-12 w-12 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center shadow-lg">
+                                <UserIcon className="h-6 w-6 text-white" />
+                              </div>
+                            </div>
+                            <div className="ml-4">
+                              <div className="text-sm font-semibold text-gray-900">{user.name}</div>
+                              <div className="text-sm text-gray-500">{user.email}</div>
                             </div>
                           </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-semibold text-gray-900">{user.name}</div>
-                            <div className="text-sm text-gray-500">{user.email}</div>
+                        </td>
+                        <td className="px-8 py-6 whitespace-nowrap">
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold shadow-lg ${getRoleBadgeColor(user.role)} text-white`}>
+                            {getRoleIcon(user.role)}
+                            {user.role.replace('_', ' ')}
+                          </span>
+                        </td>
+                        <td className="px-8 py-6 whitespace-nowrap">
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold shadow-lg ${
+                            user.isActive 
+                              ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white' 
+                              : 'bg-gradient-to-r from-gray-400 to-gray-500 text-white'
+                          }`}>
+                            {user.isActive ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
+                        <td className="px-8 py-6 whitespace-nowrap">
+                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+                            user.isExternal ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800'
+                          }`}>
+                            {user.isExternal ? 'External' : 'Internal'}
+                          </span>
+                        </td>
+                        <td className="px-8 py-6 whitespace-nowrap text-sm text-gray-500 font-medium">
+                          {new Date(user.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-8 py-6 whitespace-nowrap text-sm font-medium">
+                          <div className="flex space-x-3">
+                            <button className="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-all duration-200">
+                              <PencilIcon className="h-5 w-5" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteUser(user.id)}
+                              className="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-all duration-200"
+                            >
+                              <TrashIcon className="h-5 w-5" />
+                            </button>
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-8 py-6 whitespace-nowrap">
-                        {getRoleBadge(user.role)}
-                      </td>
-                      <td className="px-8 py-6 whitespace-nowrap">
-                        {getStatusBadge(user.isActive)}
-                      </td>
-                      <td className="px-8 py-6 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                          user.isExternal ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800'
-                        }`}>
-                          {user.isExternal ? 'External' : 'Internal'}
-                        </span>
-                      </td>
-                      <td className="px-8 py-6 whitespace-nowrap text-sm text-gray-500 font-medium">
-                        {new Date(user.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-8 py-6 whitespace-nowrap text-sm font-medium">
-                        <div className="flex space-x-3">
-                          <button
-                            onClick={() => handleEditUser(user)}
-                            className="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-all duration-200"
-                          >
-                            <PencilIcon className="h-5 w-5" />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteUser(user.id)}
-                            className="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-all duration-200"
-                          >
-                            <TrashIcon className="h-5 w-5" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       </main>

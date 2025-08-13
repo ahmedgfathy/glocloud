@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { redirect } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import FileUpload from '@/components/FileUpload'
 import FileList from '@/components/FileList'
 import Sidebar from '@/components/Sidebar'
@@ -13,10 +13,61 @@ import {
   CloudArrowUpIcon 
 } from '@heroicons/react/24/outline'
 
+interface UserStats {
+  totalFiles: number
+  storageUsed: number
+  sharedFiles: number
+}
+
 export default function Dashboard() {
   const { data: session, status } = useSession()
   const [currentFolder, setCurrentFolder] = useState<string | null>(null)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
+  const [userStats, setUserStats] = useState<UserStats>({
+    totalFiles: 0,
+    storageUsed: 0,
+    sharedFiles: 0
+  })
+  const [statsLoading, setStatsLoading] = useState(true)
+
+  useEffect(() => {
+    if (session) {
+      fetchUserStats()
+    }
+  }, [session, refreshTrigger])
+
+  const fetchUserStats = async () => {
+    try {
+      const response = await fetch('/api/files')
+      if (response.ok) {
+        const data = await response.json()
+        const files = data.files || []
+        
+        const totalFiles = files.length
+        const storageUsed = files.reduce((total: number, file: any) => total + (file.size || 0), 0)
+        const sharedFiles = 0
+        
+        setUserStats({
+          totalFiles,
+          storageUsed,
+          sharedFiles
+        })
+      }
+    } catch (error) {
+      console.error('Error fetching user stats:', error)
+    } finally {
+      setStatsLoading(false)
+    }
+  }
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes === 0) return '0 GB'
+    const k = 1024
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+    const size = parseFloat((bytes / Math.pow(k, i)).toFixed(2))
+    return size + ' ' + sizes[i]
+  }
 
   if (status === 'loading') {
     return (
@@ -32,6 +83,7 @@ export default function Dashboard() {
 
   const handleUploadSuccess = () => {
     setRefreshTrigger(prev => prev + 1)
+    fetchUserStats()
   }
 
   return (
@@ -57,13 +109,14 @@ export default function Dashboard() {
                 </div>
               </div>
               
-              {/* Quick Stats */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
                 <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-blue-600 text-sm font-medium">Total Files</p>
-                      <p className="text-2xl font-bold text-blue-700">--</p>
+                      <p className="text-2xl font-bold text-blue-700">
+                        {statsLoading ? '...' : userStats.totalFiles}
+                      </p>
                     </div>
                     <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
                       <FolderIcon className="h-6 w-6 text-white" />
@@ -75,7 +128,9 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-green-600 text-sm font-medium">Storage Used</p>
-                      <p className="text-2xl font-bold text-green-700">0 GB</p>
+                      <p className="text-2xl font-bold text-green-700">
+                        {statsLoading ? '...' : formatFileSize(userStats.storageUsed)}
+                      </p>
                     </div>
                     <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
                       <CloudIcon className="h-6 w-6 text-white" />
@@ -87,7 +142,9 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-purple-600 text-sm font-medium">Shared Files</p>
-                      <p className="text-2xl font-bold text-purple-700">--</p>
+                      <p className="text-2xl font-bold text-purple-700">
+                        {statsLoading ? '...' : userStats.sharedFiles}
+                      </p>
                     </div>
                     <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
                       <ShareIcon className="h-6 w-6 text-white" />
@@ -117,13 +174,6 @@ export default function Dashboard() {
               </div>
 
               <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-                <div className="bg-gradient-to-r from-green-600 to-blue-600 p-6">
-                  <h2 className="text-xl font-bold text-white flex items-center">
-                    <FolderIcon className="h-6 w-6 mr-3" />
-                    My Files
-                  </h2>
-                  <p className="text-green-100 mt-1">Browse and manage your files</p>
-                </div>
                 <FileList 
                   parentId={currentFolder}
                   onFolderClick={setCurrentFolder}
@@ -141,16 +191,20 @@ export default function Dashboard() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600 font-medium">Used</span>
-                    <span className="font-bold text-gray-900">0 GB</span>
+                    <span className="font-bold text-gray-900">
+                      {statsLoading ? '...' : formatFileSize(userStats.storageUsed)}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-gray-600 font-medium">Available</span>
                     <span className="font-bold text-green-600">Unlimited</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                    <div className="bg-gradient-to-r from-blue-500 to-purple-500 h-3 rounded-full transition-all duration-500" style={{width: '0%'}}></div>
+                    <div className="bg-gradient-to-r from-blue-500 to-purple-500 h-3 rounded-full transition-all duration-500" style={{width: '5%'}}></div>
                   </div>
-                  <p className="text-xs text-gray-500 text-center">0% of storage used</p>
+                  <p className="text-xs text-gray-500 text-center">
+                    {userStats.totalFiles} files stored
+                  </p>
                 </div>
               </div>
 
