@@ -36,13 +36,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen flex flex-col">
+      <body className="h-screen overflow-hidden">
         <DynamicFavicon />
         <SessionProvider>
-          <div className="flex-1 flex flex-col">
+          <div className="h-full">
             {children}
           </div>
-          <Footer />
         </SessionProvider>
       </body>
     </html>
