@@ -13,8 +13,7 @@ import {
   UserGroupIcon,
   ChartBarIcon,
   ArrowRightOnRectangleIcon,
-  CloudIcon,
-  BuildingOfficeIcon
+  CloudIcon
 } from '@heroicons/react/24/outline'
 
 interface CompanySettings {
@@ -26,7 +25,6 @@ export default function Sidebar() {
   const { data: session } = useSession()
   const pathname = usePathname()
   const isAdmin = session?.user?.role === 'SUPER_ADMIN' || session?.user?.role === 'ADMIN'
-  const isSuperAdmin = session?.user?.role === 'SUPER_ADMIN'
   
   const [companySettings, setCompanySettings] = useState<CompanySettings>({
     companyName: 'PM Cloud',
@@ -68,10 +66,6 @@ export default function Sidebar() {
     { name: 'Settings', href: '/admin/settings', icon: CogIcon },
   ]
 
-  const superAdminNavigation = [
-    { name: 'Company Settings', href: '/admin/company', icon: BuildingOfficeIcon },
-  ]
-
   const isActive = (path: string) => {
     // Exact match for most paths, but special handling for dashboard vs dashboard/files
     if (path === '/dashboard') {
@@ -92,9 +86,9 @@ export default function Sidebar() {
   }
 
   return (
-    <div className="fixed left-0 top-0 bottom-0 flex flex-col w-64 bg-gradient-to-b from-gray-900 to-black text-white shadow-2xl z-30">
+    <div className="fixed left-0 top-0 bottom-0 flex flex-col w-64 bg-gradient-to-b from-gray-900 to-black text-white shadow-2xl z-30 h-screen">
       {/* Company Logo Section */}
-      <div className="px-6 py-6 bg-gradient-to-r from-black to-gray-900 border-b border-gray-700">
+      <div className="px-6 py-6 bg-gradient-to-r from-black to-gray-900 border-b border-gray-700 flex-shrink-0">
         <div className="flex items-center space-x-4">
           <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl border-2 border-blue-400/30">
             {companySettings.companyLogo ? (
@@ -126,7 +120,7 @@ export default function Sidebar() {
 
       {/* User Profile Section */}
       {session?.user && (
-        <div className="px-6 py-4 bg-gray-800/40 border-b border-gray-700">
+        <div className="px-6 py-4 bg-gray-800/40 border-b border-gray-700 flex-shrink-0">
           <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-gray-800/60 to-gray-700/60 rounded-xl border border-gray-600/30 backdrop-blur-sm">
             <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg border-2 border-blue-400/30">
               <span className="text-white font-bold text-lg">
@@ -151,8 +145,8 @@ export default function Sidebar() {
         </div>
       )}
       
-      <div className="flex-1 flex flex-col pt-6 pb-4 overflow-y-auto">
-        <nav className="flex-1 px-6 space-y-2">
+      <div className="flex-1 flex flex-col pt-6 pb-4 min-h-0">
+        <nav className="flex-1 px-6 space-y-2 overflow-y-auto scrollbar-hide">
           <div className="mb-4">
             <h3 className="text-gray-300 text-xs font-bold uppercase tracking-wider mb-3 flex items-center">
               <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
@@ -194,37 +188,6 @@ export default function Sidebar() {
                         isActive(item.href)
                           ? 'bg-gradient-to-r from-red-600 to-pink-600 text-white shadow-lg transform scale-105'
                           : 'text-gray-300 hover:bg-gradient-to-r hover:from-red-600/20 hover:to-pink-600/20 hover:text-white'
-                      }`}
-                    >
-                      <item.icon className={`mr-3 h-5 w-5 transition-colors ${
-                        isActive(item.href)
-                          ? 'text-white'
-                          : 'text-gray-400 group-hover:text-white'
-                      }`} />
-                      {item.name}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </>
-          )}
-
-          {isSuperAdmin && (
-            <>
-              <div className="border-t border-gray-700 mt-6 pt-6">
-                <h3 className="px-4 text-xs font-bold text-gray-300 uppercase tracking-wider mb-4 flex items-center">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
-                  Super Admin
-                </h3>
-                <div className="space-y-2">
-                  {superAdminNavigation.map((item) => (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      className={`group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
-                        isActive(item.href)
-                          ? 'bg-gradient-to-r from-yellow-600 to-orange-600 text-white shadow-lg transform scale-105'
-                          : 'text-gray-300 hover:bg-gradient-to-r hover:from-yellow-600/20 hover:to-orange-600/20 hover:text-white'
                       }`}
                     >
                       <item.icon className={`mr-3 h-5 w-5 transition-colors ${

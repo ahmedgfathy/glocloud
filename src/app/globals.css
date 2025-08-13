@@ -29,4 +29,22 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .content-scrollable {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .content-scrollable::-webkit-scrollbar {
+    display: none;
+  }
 }
