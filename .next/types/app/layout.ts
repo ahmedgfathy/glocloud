@@ -1,4 +1,4 @@
-// File: /Users/ahmedgomaa/Downloads/pmcloude/src/app/layout.tsx
+// File: /Users/ahmedgomaa/Downloads/pmcloud/src/app/layout.tsx
 import * as entry from '../../../src/app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

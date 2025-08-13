@@ -115,6 +115,24 @@ model Notification {
   @@map("notifications")
 }
 
+model CompanySettings {
+  id              String   @id @default(cuid())
+  companyName     String   @default("PM Cloud")
+  companyLogo     String?
+  primaryColor    String   @default("#2563eb")
+  secondaryColor  String   @default("#1e40af")
+  contactEmail    String?
+  contactPhone    String?
+  address         String?
+  website         String?
+  description     String?
+  isConfigured    Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("company_settings")
+}
+
 enum UserRole {
   SUPER_ADMIN
   ADMIN

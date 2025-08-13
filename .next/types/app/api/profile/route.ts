@@ -1,4 +1,4 @@
-// File: /Users/ahmedgomaa/Downloads/pmcloude/src/app/api/profile/route.ts
+// File: /Users/ahmedgomaa/Downloads/pmcloud/src/app/api/profile/route.ts
 import * as entry from '../../../../../src/app/api/profile/route.js'
 import type { NextRequest } from 'next/server.js'
 

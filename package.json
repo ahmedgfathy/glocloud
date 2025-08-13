@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "setup": "node setup-app.js",
+    "db:push": "npx prisma db push",
+    "db:generate": "npx prisma generate"
   },
   "dependencies": {
     "@fontsource/roboto": "^5.2.6",

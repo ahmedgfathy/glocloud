@@ -4,6 +4,7 @@ import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import { 
   HomeIcon,
   FolderIcon,
@@ -12,13 +13,47 @@ import {
   UserGroupIcon,
   ChartBarIcon,
   ArrowRightOnRectangleIcon,
-  CloudIcon
+  CloudIcon,
+  BuildingOfficeIcon
 } from '@heroicons/react/24/outline'
+
+interface CompanySettings {
+  companyName: string;
+  companyLogo: string | null;
+}
 
 export default function Sidebar() {
   const { data: session } = useSession()
   const pathname = usePathname()
   const isAdmin = session?.user?.role === 'SUPER_ADMIN' || session?.user?.role === 'ADMIN'
+  const isSuperAdmin = session?.user?.role === 'SUPER_ADMIN'
+  
+  const [companySettings, setCompanySettings] = useState<CompanySettings>({
+    companyName: 'PM Cloud',
+    companyLogo: null
+  })
+
+  useEffect(() => {
+    // Fetch company settings for display
+    const fetchCompanySettings = async () => {
+      try {
+        const response = await fetch('/api/admin/company')
+        if (response.ok) {
+          const data = await response.json()
+          setCompanySettings({
+            companyName: data.settings.companyName,
+            companyLogo: data.settings.companyLogo
+          })
+        }
+      } catch (error) {
+        console.error('Error fetching company settings:', error)
+      }
+    }
+
+    if (session?.user) {
+      fetchCompanySettings()
+    }
+  }, [session])
 
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
@@ -30,6 +65,10 @@ export default function Sidebar() {
     { name: 'User Management', href: '/admin/users', icon: UserGroupIcon },
     { name: 'System Analytics', href: '/admin/analytics', icon: ChartBarIcon },
     { name: 'Settings', href: '/admin/settings', icon: CogIcon },
+  ]
+
+  const superAdminNavigation = [
+    { name: 'Company Settings', href: '/admin/company', icon: BuildingOfficeIcon },
   ]
 
   const isActive = (path: string) => {
@@ -44,25 +83,29 @@ export default function Sidebar() {
           {/* Logo and Company Name */}
           <div className="flex items-center space-x-3 mb-4">
             <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg">
-              <Image
-                src="/logo.svg"
-                alt="Company Logo"
-                width={32}
-                height={32}
-                className="w-8 h-8"
-                onError={(e) => {
-                  // Fallback to CloudIcon if logo fails to load
-                  e.currentTarget.style.display = 'none'
-                  const fallbackIcon = e.currentTarget.nextElementSibling as HTMLElement
-                  if (fallbackIcon) {
-                    fallbackIcon.classList.remove('hidden')
-                  }
-                }}
-              />
+              {companySettings.companyLogo ? (
+                <Image
+                  src={companySettings.companyLogo}
+                  alt="Company Logo"
+                  width={32}
+                  height={32}
+                  className="w-8 h-8 object-contain"
+                  onError={(e) => {
+                    // Fallback to CloudIcon if logo fails to load
+                    e.currentTarget.style.display = 'none'
+                    const fallbackIcon = e.currentTarget.nextElementSibling as HTMLElement
+                    if (fallbackIcon) {
+                      fallbackIcon.classList.remove('hidden')
+                    }
+                  }}
+                />
+              ) : (
+                <CloudIcon className="h-8 w-8 text-blue-600" />
+              )}
               <CloudIcon className="h-8 w-8 text-blue-600 hidden" />
             </div>
             <div className="flex-1">
-              <h1 className="text-white text-xl font-bold tracking-tight">PMS Cloud</h1>
+              <h1 className="text-white text-xl font-bold tracking-tight">{companySettings.companyName}</h1>
               <p className="text-gray-300 text-xs font-medium">File Management System</p>
             </div>
           </div>
@@ -135,6 +178,37 @@ export default function Sidebar() {
                         isActive(item.href)
                           ? 'bg-gradient-to-r from-red-600 to-pink-600 text-white shadow-lg transform scale-105'
                           : 'text-gray-300 hover:bg-gradient-to-r hover:from-red-600/20 hover:to-pink-600/20 hover:text-white'
+                      }`}
+                    >
+                      <item.icon className={`mr-3 h-5 w-5 transition-colors ${
+                        isActive(item.href)
+                          ? 'text-white'
+                          : 'text-gray-400 group-hover:text-white'
+                      }`} />
+                      {item.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+
+          {isSuperAdmin && (
+            <>
+              <div className="border-t border-gray-700 mt-6 pt-6">
+                <h3 className="px-4 text-xs font-bold text-gray-300 uppercase tracking-wider mb-4 flex items-center">
+                  <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
+                  Super Admin
+                </h3>
+                <div className="space-y-2">
+                  {superAdminNavigation.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={`group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
+                        isActive(item.href)
+                          ? 'bg-gradient-to-r from-yellow-600 to-orange-600 text-white shadow-lg transform scale-105'
+                          : 'text-gray-300 hover:bg-gradient-to-r hover:from-yellow-600/20 hover:to-orange-600/20 hover:text-white'
                       }`}
                     >
                       <item.icon className={`mr-3 h-5 w-5 transition-colors ${
