@@ -157,11 +157,11 @@ export default function SharedPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
         <Sidebar />
-        <main className="ml-64 p-8">
+        <main className="ml-64 p-6">
           <div className="max-w-7xl mx-auto">
             <div className="animate-pulse">
-              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200 mb-8">
-                <div className="h-8 bg-gray-300 rounded-lg w-64 mb-4"></div>
+              <div className="bg-white rounded-2xl shadow-lg p-4 border border-gray-200 mb-6">
+                <div className="h-6 bg-gray-300 rounded-lg w-64 mb-2"></div>
                 <div className="h-4 bg-gray-200 rounded w-96"></div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -183,62 +183,62 @@ export default function SharedPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <Sidebar />
-      <main className="ml-64 p-8">
+      <main className="ml-64 p-6">
         <div className="max-w-7xl mx-auto">
           {/* Header Section */}
-          <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200 mb-8">
-            <div className="flex items-center space-x-4 mb-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center shadow-lg">
-                <ShareIcon className="h-8 w-8 text-white" />
+          <div className="bg-white rounded-2xl shadow-lg p-4 border border-gray-200 mb-6">
+            <div className="flex items-center space-x-3 mb-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg">
+                <ShareIcon className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                <h1 className="text-2xl font-bold text-gray-900 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
                   Shared with Me
                 </h1>
-                <p className="text-gray-600 text-lg mt-1">
+                <p className="text-gray-600 text-base">
                   Files and folders that have been shared with you
                 </p>
               </div>
             </div>
             
             {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-3 border border-blue-200">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-blue-600 text-sm font-medium">Total Shared</p>
-                    <p className="text-2xl font-bold text-blue-700">{files.length}</p>
+                    <p className="text-xl font-bold text-blue-700">{files.length}</p>
                   </div>
-                  <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
-                    <ShareIcon className="h-6 w-6 text-white" />
+                  <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                    <ShareIcon className="h-5 w-5 text-white" />
                   </div>
                 </div>
               </div>
               
-              <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border border-green-200">
+              <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-3 border border-green-200">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-green-600 text-sm font-medium">Downloadable</p>
-                    <p className="text-2xl font-bold text-green-700">
+                    <p className="text-xl font-bold text-green-700">
                       {files.filter(f => f.share.permissions === 'DOWNLOAD' || f.share.permissions === 'EDIT').length}
                     </p>
                   </div>
-                  <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
-                    <ArrowDownTrayIcon className="h-6 w-6 text-white" />
+                  <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                    <ArrowDownTrayIcon className="h-5 w-5 text-white" />
                   </div>
                 </div>
               </div>
               
-              <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 border border-purple-200">
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-3 border border-purple-200">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-purple-600 text-sm font-medium">Folders</p>
-                    <p className="text-2xl font-bold text-purple-700">
+                    <p className="text-xl font-bold text-purple-700">
                       {files.filter(f => f.isFolder).length}
                     </p>
                   </div>
-                  <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
-                    <FolderIcon className="h-6 w-6 text-white" />
+                  <div className="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center">
+                    <FolderIcon className="h-5 w-5 text-white" />
                   </div>
                 </div>
               </div>
