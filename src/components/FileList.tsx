@@ -81,6 +81,22 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger, sear
     })
   }
 
+  const truncateFileName = (fileName: string, maxLength: number = 35): string => {
+    if (fileName.length <= maxLength) return fileName;
+    
+    const extension = fileName.split('.').pop();
+    const nameWithoutExt = fileName.substring(0, fileName.lastIndexOf('.'));
+    
+    if (extension) {
+      const maxNameLength = maxLength - extension.length - 4; // 4 for "..." and "."
+      if (maxNameLength > 0) {
+        return `${nameWithoutExt.substring(0, maxNameLength)}...${extension}`;
+      }
+    }
+    
+    return `${fileName.substring(0, maxLength - 3)}...`;
+  }
+
   // Filter files based on search term and file type
   const filteredFiles = useMemo(() => {
     return files.filter(file => {
@@ -463,7 +479,7 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger, sear
   const GridView = () => (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 p-6">
       {filteredFiles.map((file) => (
-        <div key={file.id} className="bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-200 p-4 group">
+        <div key={file.id} className="group relative bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-200 p-4">
           <div className="flex flex-col items-center text-center">
             {/* File Icon */}
             <div className="w-12 h-12 mb-3 flex items-center justify-center">
@@ -479,7 +495,7 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger, sear
                   onFolderClick(file.id)
                 }
               }}
-              className={`text-sm font-medium truncate w-full ${
+              className={`text-sm font-medium w-full ${
                 file.isFolder 
                   ? 'text-blue-600 hover:text-blue-800 cursor-pointer hover:underline' 
                   : 'text-gray-900'
@@ -487,7 +503,7 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger, sear
               title={file.originalName}
               disabled={!file.isFolder}
             >
-              {file.originalName}
+              <span className="block truncate">{truncateFileName(file.originalName, 20)}</span>
             </button>
             
             {/* File Size */}
@@ -495,56 +511,58 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger, sear
               {file.isFolder ? "Folder" : formatFileSize(file.size)}
             </p>
             
-            {/* Actions - Show on hover */}
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 mt-3 flex space-x-1">
-              {!file.isFolder && (
-                <>
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      handleView(file.id)
-                    }}
-                    className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
-                    title="View file"
-                  >
-                    <EyeIcon className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault()
-                      e.stopPropagation()
-                      handleDownload(file.id, file.originalName)
-                    }}
-                    className="p-1.5 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50 transition-colors"
-                    title="Download file"
-                  >
-                    <ArrowDownTrayIcon className="h-4 w-4" />
-                  </button>
-                </>
-              )}
-              <button
-                onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  handleShare(file.id, file.originalName)
-                }}
-                className="p-1.5 rounded-lg text-gray-400 hover:text-purple-600 hover:bg-purple-50 transition-colors"
-                title="Share"
-              >
-                <ShareIcon className="h-4 w-4" />
-              </button>
-              <button
-                onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  confirmDelete(file.id)
-                }}
-                className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
-                title="Delete"
-              >
-                <TrashIcon className="h-4 w-4" />
-              </button>
+            {/* Hover Actions - Overlay */}
+            <div className="absolute inset-0 bg-black bg-opacity-50 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
+              <div className="flex space-x-2">
+                {!file.isFolder && (
+                  <>
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        handleView(file.id)
+                      }}
+                      className="p-2 bg-white rounded-lg text-blue-600 hover:text-blue-800 hover:bg-blue-50 transition-colors shadow-lg"
+                      title="View file"
+                    >
+                      <EyeIcon className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        handleDownload(file.id, file.originalName)
+                      }}
+                      className="p-2 bg-white rounded-lg text-green-600 hover:text-green-800 hover:bg-green-50 transition-colors shadow-lg"
+                      title="Download file"
+                    >
+                      <ArrowDownTrayIcon className="h-4 w-4" />
+                    </button>
+                  </>
+                )}
+                <button
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    handleShare(file.id, file.originalName)
+                  }}
+                  className="p-2 bg-white rounded-lg text-purple-600 hover:text-purple-800 hover:bg-purple-50 transition-colors shadow-lg"
+                  title="Share"
+                >
+                  <ShareIcon className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    confirmDelete(file.id)
+                  }}
+                  className="p-2 bg-white rounded-lg text-red-600 hover:text-red-800 hover:bg-red-50 transition-colors shadow-lg"
+                  title="Delete"
+                >
+                  <TrashIcon className="h-4 w-4" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -581,7 +599,7 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger, sear
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {filteredFiles.map((file) => (
-            <tr key={file.id} className="hover:bg-gray-50 transition-colors duration-200">
+            <tr key={file.id} className="group hover:bg-gray-50 transition-colors duration-200">
               <td className="px-8 py-6 whitespace-nowrap">
                 <div className="flex items-center space-x-4">
                   {getListFileIcon(file)}
@@ -594,14 +612,15 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger, sear
                           onFolderClick(file.id)
                         }
                       }}
-                      className={`text-sm font-semibold truncate block ${
+                      className={`text-sm font-semibold block ${
                         file.isFolder 
                           ? 'text-blue-600 hover:text-blue-800 cursor-pointer hover:underline' 
                           : 'text-gray-900'
                       }`}
+                      title={file.originalName}
                       disabled={!file.isFolder}
                     >
-                      {file.originalName}
+                      <span className="truncate">{truncateFileName(file.originalName, 40)}</span>
                     </button>
                     <p className="text-xs text-gray-500 truncate mt-1">
                       {file.mimeType}
@@ -650,7 +669,8 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger, sear
                 </div>
               </td>
               <td className="px-8 py-6 whitespace-nowrap text-sm text-gray-500">
-                <div className="flex justify-end space-x-2">
+                {/* Regular actions - always visible */}
+                <div className="group-hover:hidden flex justify-end space-x-2">
                   {!file.isFolder && (
                     <>
                       <button
@@ -677,13 +697,43 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger, sear
                       </button>
                     </>
                   )}
+                </div>
+                
+                {/* Hover actions - show all actions on hover */}
+                <div className="hidden group-hover:flex justify-end space-x-1">
+                  {!file.isFolder && (
+                    <>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          handleView(file.id)
+                        }}
+                        className="inline-flex items-center p-2 border border-transparent rounded-xl text-blue-600 hover:text-blue-800 hover:bg-blue-50 transition-all duration-200 shadow-sm"
+                        title="View file"
+                      >
+                        <EyeIcon className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          handleDownload(file.id, file.originalName)
+                        }}
+                        className="inline-flex items-center p-2 border border-transparent rounded-xl text-green-600 hover:text-green-800 hover:bg-green-50 transition-all duration-200 shadow-sm"
+                        title="Download file"
+                      >
+                        <ArrowDownTrayIcon className="h-4 w-4" />
+                      </button>
+                    </>
+                  )}
                   <button
                     onClick={(e) => {
                       e.preventDefault()
                       e.stopPropagation()
                       handleShare(file.id, file.originalName)
                     }}
-                    className="inline-flex items-center p-2 border border-transparent rounded-xl text-gray-400 hover:text-purple-600 hover:bg-purple-50 transition-all duration-200"
+                    className="inline-flex items-center p-2 border border-transparent rounded-xl text-purple-600 hover:text-purple-800 hover:bg-purple-50 transition-all duration-200 shadow-sm"
                     title="Share"
                   >
                     <ShareIcon className="h-4 w-4" />
@@ -694,7 +744,7 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger, sear
                       e.stopPropagation()
                       confirmDelete(file.id)
                     }}
-                    className="inline-flex items-center p-2 border border-transparent rounded-xl text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all duration-200"
+                    className="inline-flex items-center p-2 border border-transparent rounded-xl text-red-600 hover:text-red-800 hover:bg-red-50 transition-all duration-200 shadow-sm"
                     title="Delete"
                   >
                     <TrashIcon className="h-4 w-4" />

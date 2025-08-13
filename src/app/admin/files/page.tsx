@@ -14,6 +14,8 @@ import {
   EyeIcon,
   MagnifyingGlassIcon,
   FunnelIcon,
+  ShareIcon,
+  TrashIcon,
 } from '@heroicons/react/24/outline';
 
 interface OrganizedFile {
@@ -107,6 +109,22 @@ export default function FileStructurePage() {
     return '📁';
   };
 
+  const truncateFileName = (fileName: string, maxLength: number = 25): string => {
+    if (fileName.length <= maxLength) return fileName;
+    
+    const extension = fileName.split('.').pop();
+    const nameWithoutExt = fileName.substring(0, fileName.lastIndexOf('.'));
+    
+    if (extension) {
+      const maxNameLength = maxLength - extension.length - 4; // 4 for "..." and "."
+      if (maxNameLength > 0) {
+        return `${nameWithoutExt.substring(0, maxNameLength)}...${extension}`;
+      }
+    }
+    
+    return `${fileName.substring(0, maxLength - 3)}...`;
+  };
+
   // Get all unique employees for filter
   const allEmployees = organizedFiles.map(emp => ({
     id: emp.employeeId,
@@ -151,7 +169,7 @@ export default function FileStructurePage() {
       
       <main className="flex-1 ml-64 flex flex-col h-screen">
         <div className="flex-1 overflow-y-auto content-scrollable p-8">
-          <div className="max-w-7xl mx-auto">
+          <div className="max-w-6xl mx-auto">
             {/* Header */}
             <div className="mb-8">
               <div className="flex items-center space-x-3 mb-4">
@@ -222,7 +240,7 @@ export default function FileStructurePage() {
             </div>
 
             {/* File Structure */}
-            <div className="space-y-6">
+            <div className="space-y-6 pb-8">
               {filteredFiles.length === 0 ? (
                 <div className="bg-white rounded-xl shadow-lg p-12 text-center">
                   <FolderIcon className="h-16 w-16 text-gray-300 mx-auto mb-4" />
@@ -290,24 +308,50 @@ export default function FileStructurePage() {
                             <div className="p-4">
                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                                 {week.files.map((file) => (
-                                  <div key={file.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                  <div key={file.id} className="group relative flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                                     <span className="text-2xl">{getFileIcon(file.mimeType)}</span>
-                                    <div className="flex-1 min-w-0">
-                                      <p className="text-sm font-medium text-gray-900 truncate">
-                                        {file.originalName}
+                                    <div className="flex-1 min-w-0 relative">
+                                      <p 
+                                        className="text-sm font-medium text-gray-900 truncate cursor-help" 
+                                        title={file.originalName}
+                                      >
+                                        {truncateFileName(file.originalName)}
                                       </p>
                                       <p className="text-xs text-gray-500">
                                         {formatFileSize(file.size)} • {new Date(file.createdAt).toLocaleDateString()}
                                       </p>
-                                    </div>
-                                    <div className="flex space-x-1">
-                                      <a
-                                        href={`/api/files/${file.id}/download`}
-                                        className="p-1 text-blue-600 hover:text-blue-800 rounded"
-                                        title="Download"
-                                      >
-                                        <CloudArrowDownIcon className="h-4 w-4" />
-                                      </a>
+                                      
+                                      {/* Hover Actions Overlay */}
+                                      <div className="absolute inset-0 bg-white/95 backdrop-blur-sm rounded-lg flex items-center justify-center space-x-2 opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-lg border border-gray-200">
+                                        <a
+                                          href={`/api/files/${file.id}/view`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-md transition-colors shadow-sm border border-blue-200"
+                                          title="View"
+                                        >
+                                          <EyeIcon className="h-4 w-4" />
+                                        </a>
+                                        <a
+                                          href={`/api/files/${file.id}/download`}
+                                          className="p-2 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-md transition-colors shadow-sm border border-green-200"
+                                          title="Download"
+                                        >
+                                          <CloudArrowDownIcon className="h-4 w-4" />
+                                        </a>
+                                        <button
+                                          className="p-2 text-purple-600 hover:text-purple-800 hover:bg-purple-50 rounded-md transition-colors shadow-sm border border-purple-200"
+                                          title="Share"
+                                        >
+                                          <ShareIcon className="h-4 w-4" />
+                                        </button>
+                                        <button
+                                          className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-md transition-colors shadow-sm border border-red-200"
+                                          title="Delete"
+                                        >
+                                          <TrashIcon className="h-4 w-4" />
+                                        </button>
+                                      </div>
                                     </div>
                                   </div>
                                 ))}

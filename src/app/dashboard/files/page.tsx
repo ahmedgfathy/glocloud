@@ -65,7 +65,7 @@ export default function FilesPage() {
       <Sidebar />
       <main className="flex-1 ml-64 flex flex-col h-screen">
         <div className="flex-1 overflow-y-auto content-scrollable p-8">
-          <div className="max-w-7xl mx-auto">
+          <div className="max-w-6xl mx-auto">
             {/* Header */}
             <div className="mb-8">
               <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
@@ -153,7 +153,7 @@ export default function FilesPage() {
             </div>
 
             {/* Files List */}
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden mb-8">
               <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6">
                 <h2 className="text-xl font-bold text-white flex items-center">
                   <DocumentIcon className="h-6 w-6 mr-3" />
@@ -164,7 +164,7 @@ export default function FilesPage() {
                    currentFolder ? 'Files and folders in current directory' : 'All your files and folders'}
                 </p>
               </div>
-              <div className="max-h-96 overflow-y-auto content-scrollable">
+              <div className="overflow-y-auto content-scrollable">
                 <FileList 
                   parentId={currentFolder}
                   onFolderClick={handleFolderClick}

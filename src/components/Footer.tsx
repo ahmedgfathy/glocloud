@@ -31,21 +31,21 @@ export default function Footer() {
   }, [])
 
   return (
-    <footer className="bg-gray-900 text-gray-300 py-6 mt-auto">
+    <footer className="bg-gradient-to-b from-gray-900 to-black text-gray-300 py-3 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col sm:flex-row items-center justify-between">
           <div className="flex items-center space-x-2">
-            <span className="text-sm">
+            <span className="text-xs">
               © 2025 {companySettings?.companyName || 'PMS Cloud'}. All rights reserved.
             </span>
           </div>
-          <div className="flex items-center space-x-1 mt-2 sm:mt-0">
-            <span className="text-sm">
+          <div className="flex items-center space-x-1 mt-1 sm:mt-0">
+            <span className="text-xs">
               Developed and designed by
             </span>
             <a
               href="mailto:ahmed.fathy@pms.eg"
-              className="text-blue-400 hover:text-blue-300 transition-colors font-medium"
+              className="text-blue-400 hover:text-blue-300 transition-colors font-medium text-xs"
             >
               Ahmed Fathy
             </a>

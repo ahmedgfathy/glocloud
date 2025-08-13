@@ -92,6 +92,22 @@ export default function SharedPage() {
     })
   }
 
+  const truncateFileName = (fileName: string, maxLength: number = 20): string => {
+    if (fileName.length <= maxLength) return fileName;
+    
+    const extension = fileName.split('.').pop();
+    const nameWithoutExt = fileName.substring(0, fileName.lastIndexOf('.'));
+    
+    if (extension) {
+      const maxNameLength = maxLength - extension.length - 4; // 4 for "..." and "."
+      if (maxNameLength > 0) {
+        return `${nameWithoutExt.substring(0, maxNameLength)}...${extension}`;
+      }
+    }
+    
+    return `${fileName.substring(0, maxLength - 3)}...`;
+  }
+
   const getPermissionBadge = (permission: string) => {
     const configs = {
       VIEW: { 
@@ -290,8 +306,8 @@ export default function SharedPage() {
                               )}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <h3 className="text-lg font-semibold text-gray-900 truncate group-hover:text-blue-600 transition-colors">
-                                {file.originalName}
+                              <h3 className="text-lg font-semibold text-gray-900 truncate group-hover:text-blue-600 transition-colors" title={file.originalName}>
+                                {truncateFileName(file.originalName)}
                               </h3>
                               <p className="text-sm text-gray-500 truncate">
                                 {file.isFolder ? 'Folder' : file.mimeType.split('/')[1]?.toUpperCase() || 'File'}
