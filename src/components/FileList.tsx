@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
 import { 
   DocumentIcon, 
   FolderIcon, 
@@ -9,7 +10,9 @@ import {
   EyeIcon,
   ArrowDownTrayIcon,
   Squares2X2Icon,
-  ListBulletIcon
+  ListBulletIcon,
+  UserIcon,
+  CalendarIcon
 } from '@heroicons/react/24/outline'
 import ShareModal from './ShareModal'
 
@@ -21,9 +24,13 @@ interface FileItem {
   mimeType: string
   isFolder: boolean
   createdAt: string
+  uploadPath?: string
+  weekNumber?: number
   owner: {
+    id: string
     name: string
     email: string
+    employeeId?: string
   }
 }
 
@@ -34,11 +41,14 @@ interface FileListProps {
 }
 
 export default function FileList({ parentId, onFolderClick, refreshTrigger }: FileListProps) {
+  const { data: session } = useSession()
   const [files, setFiles] = useState<FileItem[]>([])
   const [loading, setLoading] = useState(true)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [shareModal, setShareModal] = useState<{ fileId: string; fileName: string } | null>(null)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
+  
+  const isAdmin = session?.user?.role === 'SUPER_ADMIN' || session?.user?.role === 'ADMIN'
 
   useEffect(() => {
     const fetchFiles = async () => {
@@ -291,6 +301,11 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger }: Fi
             <th className="px-8 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
               Modified
             </th>
+            {isAdmin && (
+              <th className="px-8 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
+                Location
+              </th>
+            )}
             <th className="px-8 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
               Owner
             </th>
@@ -347,6 +362,24 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger }: Fi
               <td className="px-8 py-6 whitespace-nowrap text-sm text-gray-500 font-medium">
                 {formatDate(file.createdAt)}
               </td>
+              {isAdmin && (
+                <td className="px-8 py-6 whitespace-nowrap text-sm text-gray-500">
+                  {file.uploadPath && file.weekNumber ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-1 bg-blue-50 px-2 py-1 rounded-lg">
+                        <UserIcon className="h-3 w-3 text-blue-600" />
+                        <span className="text-xs font-medium text-blue-700">{file.owner.employeeId || file.owner.id}</span>
+                      </div>
+                      <div className="flex items-center space-x-1 bg-green-50 px-2 py-1 rounded-lg">
+                        <CalendarIcon className="h-3 w-3 text-green-600" />
+                        <span className="text-xs font-medium text-green-700">Week {file.weekNumber}</span>
+                      </div>
+                    </div>
+                  ) : (
+                    <span className="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-lg">Legacy Path</span>
+                  )}
+                </td>
+              )}
               <td className="px-8 py-6 whitespace-nowrap text-sm text-gray-500">
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-600 rounded-full flex items-center justify-center shadow-lg">

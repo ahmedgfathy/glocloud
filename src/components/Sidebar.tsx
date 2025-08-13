@@ -63,6 +63,7 @@ export default function Sidebar() {
 
   const adminNavigation = [
     { name: 'User Management', href: '/admin/users', icon: UserGroupIcon },
+    { name: 'File Structure', href: '/admin/files', icon: FolderIcon },
     { name: 'System Analytics', href: '/admin/analytics', icon: ChartBarIcon },
     { name: 'Settings', href: '/admin/settings', icon: CogIcon },
   ]

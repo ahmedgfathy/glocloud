@@ -3,9 +3,9 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { getClientIP, getUserAgent, generateActivityId } from '@/lib/utils'
+import { createEmployeeUploadPath, generateEmployeeFilename, getCurrentWeekNumber } from '@/lib/fileUtils'
 import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
-import { v4 as uuidv4 } from 'uuid'
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,6 +15,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    // Get user details to access employeeId
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { employeeId: true, email: true, name: true }
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
+
+    // Use employeeId or fallback to user ID if employeeId is not set
+    const employeeIdentifier = user.employeeId || session.user.id;
+
     const formData = await request.formData()
     const file = formData.get('file') as File
     const parentId = formData.get('parentId') as string | null
@@ -23,45 +36,51 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No file uploaded' }, { status: 400 })
     }
 
-    // Create upload directory if it doesn't exist
-    const uploadDir = join(process.cwd(), 'uploads')
+    // Get current week number
+    const currentWeek = getCurrentWeekNumber();
+    
+    // Create employee-specific upload path: uploads/{employeeId}/week-{weekNumber}/
+    const employeeUploadPath = createEmployeeUploadPath(employeeIdentifier, currentWeek);
+    const fullUploadDir = join(process.cwd(), employeeUploadPath);
+    
+    // Create directory structure if it doesn't exist
     try {
-      await mkdir(uploadDir, { recursive: true })
+      await mkdir(fullUploadDir, { recursive: true });
     } catch (error) {
-      // Directory might already exist
+      console.error('Error creating directory:', error);
     }
 
-    // Generate unique filename
-    const fileExtension = file.name.split('.').pop()
-    const uniqueFilename = `${uuidv4()}.${fileExtension}`
-    const filePath = join(uploadDir, uniqueFilename)
+    // Generate employee-specific filename
+    const uniqueFilename = generateEmployeeFilename(file.name);
+    const filePath = join(fullUploadDir, uniqueFilename);
+    const relativePath = join(employeeUploadPath, uniqueFilename);
 
     // Write file to disk
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
     await writeFile(filePath, buffer)
 
-    // Save file metadata to database
+    // Save file metadata to database with relative path for portability
     const fileRecord = await prisma.file.create({
       data: {
         name: uniqueFilename,
         originalName: file.name,
         size: file.size,
         mimeType: file.type,
-        path: filePath,
+        path: relativePath, // Store relative path for portability
         ownerId: session.user.id,
         parentId: parentId || undefined
       }
     })
 
-    // Log upload activity
+    // Log upload activity with week information
     await prisma.activity.create({
       data: {
         id: generateActivityId(),
         userId: session.user.id,
         fileId: fileRecord.id,
         action: 'FILE_UPLOAD',
-        details: `Uploaded file: ${file.name}`,
+        details: `Uploaded file: ${file.name} (Employee: ${employeeIdentifier}, Week: ${currentWeek})`,
         ipAddress: getClientIP(request),
         userAgent: getUserAgent(request)
       }
@@ -74,7 +93,10 @@ export async function POST(request: NextRequest) {
         name: fileRecord.originalName,
         size: fileRecord.size,
         mimeType: fileRecord.mimeType,
-        createdAt: fileRecord.createdAt
+        createdAt: fileRecord.createdAt,
+        employeeId: employeeIdentifier,
+        weekNumber: currentWeek,
+        path: employeeUploadPath
       }
     })
   } catch (error) {

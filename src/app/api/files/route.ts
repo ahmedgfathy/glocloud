@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { getWeekNumber } from '@/lib/fileUtils'
 
 export async function GET(request: NextRequest) {
   try {
@@ -23,8 +24,10 @@ export async function GET(request: NextRequest) {
       include: {
         owner: {
           select: {
+            id: true,
             name: true,
-            email: true
+            email: true,
+            employeeId: true
           }
         }
       },
@@ -34,7 +37,13 @@ export async function GET(request: NextRequest) {
       ]
     })
 
-    return NextResponse.json({ files })
+    // Add week number calculation for files with structured paths
+    const filesWithWeekInfo = files.map(file => ({
+      ...file,
+      weekNumber: file.uploadPath ? getWeekNumber(file.createdAt) : null
+    }))
+
+    return NextResponse.json({ files: filesWithWeekInfo })
   } catch (error: any) {
     console.error('Error fetching files:', error)
     return NextResponse.json(

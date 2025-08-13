@@ -5,6 +5,7 @@ import { prisma } from '@/lib/prisma'
 import { getClientIP, getUserAgent, generateActivityId } from '@/lib/utils'
 import { createReadStream, existsSync } from 'fs'
 import { stat } from 'fs/promises'
+import { join } from 'path'
 
 export async function GET(
   request: NextRequest,
@@ -50,13 +51,20 @@ export async function GET(
       }
     }
 
-    // Check if file exists on disk
-    if (!existsSync(file.path)) {
+    // Check if file exists on disk - handle both relative and absolute paths
+    let fullFilePath = file.path;
+    
+    // If path is relative (new structure), make it absolute
+    if (!file.path.startsWith('/') && !file.path.includes(':\\')) {
+      fullFilePath = join(process.cwd(), file.path);
+    }
+    
+    if (!existsSync(fullFilePath)) {
       return NextResponse.json({ error: 'File not found on disk' }, { status: 404 })
     }
 
     // Get file stats
-    const fileStats = await stat(file.path)
+    const fileStats = await stat(fullFilePath)
     
     // Log download activity
     await prisma.activity.create({
@@ -72,7 +80,7 @@ export async function GET(
     })
 
     // Create a readable stream
-    const fileStream = createReadStream(file.path)
+    const fileStream = createReadStream(fullFilePath)
     
     // Set appropriate headers for download
     const headers = new Headers()

@@ -50,6 +50,7 @@ model File {
   size         Int
   mimeType     String
   path         String
+  uploadPath   String?    // New field for employee/week path structure
   isFolder     Boolean    @default(false)
   parentId     String?
   ownerId      String
