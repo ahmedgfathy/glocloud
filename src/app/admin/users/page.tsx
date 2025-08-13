@@ -32,13 +32,17 @@ export default function AdminUsersPage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    // Add defensive checks
+    if (!router) return
+    
     if (status === 'unauthenticated') {
       router.push('/auth/signin')
       return
     }
 
-    if (status === 'authenticated') {
-      if (session?.user?.role !== 'SUPER_ADMIN' && session?.user?.role !== 'ADMIN') {
+    if (status === 'authenticated' && session?.user) {
+      const userRole = session.user.role
+      if (userRole !== 'SUPER_ADMIN' && userRole !== 'ADMIN') {
         router.push('/dashboard')
         return
       }
@@ -50,12 +54,17 @@ export default function AdminUsersPage() {
   const fetchUsers = async () => {
     try {
       setError(null)
+      setLoading(true)
       const response = await fetch('/api/users')
       if (response.ok) {
         const data = await response.json()
-        setUsers(data || [])
+        console.log('API Response:', data) // Debug log
+        // The API returns { users: [...] } structure
+        setUsers(Array.isArray(data.users) ? data.users : [])
       } else {
-        setError('Failed to fetch users')
+        const errorData = await response.json()
+        console.error('API Error:', errorData)
+        setError(errorData.error || 'Failed to fetch users')
       }
     } catch (error) {
       console.error('Error fetching users:', error)

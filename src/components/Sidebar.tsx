@@ -3,7 +3,7 @@
 import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { 
   HomeIcon,
   FolderIcon,
@@ -12,16 +12,12 @@ import {
   UserGroupIcon,
   ChartBarIcon,
   ArrowRightOnRectangleIcon,
-  CloudIcon,
-  DocumentPlusIcon,
-  FolderPlusIcon,
-  CloudArrowUpIcon
+  CloudIcon
 } from '@heroicons/react/24/outline'
 
 export default function Sidebar() {
   const { data: session } = useSession()
   const pathname = usePathname()
-  const router = useRouter()
   const isAdmin = session?.user?.role === 'SUPER_ADMIN' || session?.user?.role === 'ADMIN'
 
   const navigation = [
@@ -36,33 +32,8 @@ export default function Sidebar() {
     { name: 'Settings', href: '/admin/settings', icon: CogIcon },
   ]
 
-  const quickActions = [
-    { name: 'Create Folder', icon: FolderPlusIcon, action: 'create-folder' },
-    { name: 'Upload Files', icon: CloudArrowUpIcon, action: 'upload-files' },
-    { name: 'Share Folder', icon: ShareIcon, action: 'share-folder' },
-  ]
-
   const isActive = (path: string) => {
     return pathname === path || pathname.startsWith(path + '/')
-  }
-
-  const handleQuickAction = (action: string) => {
-    switch (action) {
-      case 'create-folder':
-        // Navigate to files page and trigger create folder
-        router.push('/dashboard/files?action=create-folder')
-        break
-      case 'upload-files':
-        // Navigate to files page and trigger upload
-        router.push('/dashboard/files?action=upload')
-        break
-      case 'share-folder':
-        // Navigate to files page and show sharing options
-        router.push('/dashboard/files?action=share')
-        break
-      default:
-        break
-    }
   }
 
   return (
@@ -114,28 +85,8 @@ export default function Sidebar() {
           </div>
         </div>
       )}
-
-      {/* Quick Actions */}
-      <div className="px-6 py-5 border-b border-gray-700">
-        <h3 className="text-gray-300 text-xs font-bold uppercase tracking-wider mb-4 flex items-center">
-          <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-          Quick Actions
-        </h3>
-        <div className="space-y-2">
-          {quickActions.map((action) => (
-            <button
-              key={action.action}
-              onClick={() => handleQuickAction(action.action)}
-              className="w-full flex items-center px-4 py-3 text-sm font-medium text-gray-300 rounded-xl hover:bg-gradient-to-r hover:from-blue-600 hover:to-purple-600 hover:text-white transition-all duration-200 group transform hover:scale-105"
-            >
-              <action.icon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-white transition-colors" />
-              {action.name}
-            </button>
-          ))}
-        </div>
-      </div>
       
-      <div className="flex-1 flex flex-col pt-2 pb-4 overflow-y-auto">
+      <div className="flex-1 flex flex-col pt-6 pb-4 overflow-y-auto">
         <nav className="flex-1 px-6 space-y-2">
           <div className="mb-4">
             <h3 className="text-gray-300 text-xs font-bold uppercase tracking-wider mb-3 flex items-center">
