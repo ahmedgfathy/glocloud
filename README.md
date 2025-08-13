@@ -61,7 +61,7 @@ A comprehensive cloud storage solution similar to Dropbox, built with Next.js an
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd pmcloude
+   cd pmcloud
    ```
 
 2. **Install dependencies**
@@ -151,7 +151,7 @@ After setting up the database, you'll need to create the first admin user manual
 ## Project Structure
 
 ```
-pmcloude/
+pmcloud/
 ├── src/
 │   ├── app/                    # Next.js App Router pages
 │   │   ├── api/               # API routes
@@ -232,4 +232,4 @@ For support and questions, please contact the development team or create an issu
 
 ---
 
-**PMS Cloud** - Secure, scalable, and feature-rich cloud storage for your business needs.
+**PM Cloud** - Secure, scalable, and feature-rich cloud storage for your business needs.

@@ -4,7 +4,7 @@ import Footer from '@/components/Footer'
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "PMS Cloud - Cloud Storage System",
+  title: "PM Cloud - Cloud Storage System",
   description: "Secure cloud storage and file sharing for your business",
 };
 
