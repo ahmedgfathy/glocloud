@@ -1,0 +1,143 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  name        String
+  password    String
+  role        UserRole @default(EMPLOYEE)
+  isActive    Boolean  @default(false)
+  isExternal  Boolean  @default(false)
+  avatar      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  ownedFiles     File[]        @relation("FileOwner")
+  sharedFiles    FileShare[]
+  activities     Activity[]
+  notifications  Notification[]
+  invitedBy      User?         @relation("UserInvites", fields: [invitedById], references: [id])
+  invitedById    String?
+  invitedUsers   User[]        @relation("UserInvites")
+
+  @@map("users")
+}
+
+model File {
+  id           String     @id @default(cuid())
+  name         String
+  originalName String
+  size         Int
+  mimeType     String
+  path         String
+  isFolder     Boolean    @default(false)
+  parentId     String?
+  ownerId      String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  // Relations
+  owner        User         @relation("FileOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  parent       File?        @relation("FileHierarchy", fields: [parentId], references: [id])
+  children     File[]       @relation("FileHierarchy")
+  shares       FileShare[]
+  activities   Activity[]
+
+  @@map("files")
+}
+
+model FileShare {
+  id         String          @id @default(cuid())
+  fileId     String
+  userId     String
+  permission FilePermission  @default(VIEW)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  // Relations
+  file       File            @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  user       User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([fileId, userId])
+  @@map("file_shares")
+}
+
+model Activity {
+  id        String       @id @default(cuid())
+  userId    String
+  fileId    String?
+  action    ActivityType
+  details   String?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime     @default(now())
+
+  // Relations
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  file      File?        @relation(fields: [fileId], references: [id], onDelete: SetNull)
+
+  @@map("activities")
+}
+
+model Notification {
+  id        String             @id @default(cuid())
+  userId    String
+  type      NotificationType
+  title     String
+  message   String
+  isRead    Boolean            @default(false)
+  data      Json?
+  createdAt DateTime           @default(now())
+
+  // Relations
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  EMPLOYEE
+}
+
+enum FilePermission {
+  VIEW
+  EDIT
+  FULL_ACCESS
+}
+
+enum ActivityType {
+  LOGIN
+  LOGOUT
+  FILE_UPLOAD
+  FILE_DOWNLOAD
+  FILE_DELETE
+  FILE_SHARE
+  FILE_EDIT
+  FILE_VIEW
+  FOLDER_CREATE
+  USER_INVITE
+  PASSWORD_CHANGE
+}
+
+enum NotificationType {
+  FILE_SHARED
+  FILE_UPLOADED
+  USER_INVITED
+  SYSTEM_ALERT
+}
