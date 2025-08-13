@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { getClientIP, getUserAgent, generateActivityId } from '@/lib/utils'
 import { unlink } from 'fs/promises'
 
 export async function DELETE(
@@ -48,10 +49,12 @@ export async function DELETE(
     // Log the deletion
     await prisma.activity.create({
       data: {
-        id: `act_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+        id: generateActivityId(),
         userId: session.user.id,
         action: 'FILE_DELETE',
-        details: `Deleted ${file.isFolder ? 'folder' : 'file'}: ${file.originalName}`
+        details: `Deleted ${file.isFolder ? 'folder' : 'file'}: ${file.originalName}`,
+        ipAddress: getClientIP(request),
+        userAgent: getUserAgent(request)
       }
     })
 
@@ -117,11 +120,13 @@ export async function GET(
     // Log the view activity
     await prisma.activity.create({
       data: {
-        id: `act_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+        id: generateActivityId(),
         userId: session.user.id,
         fileId: fileId,
-        action: 'FILE_DOWNLOAD', // Using this for view activity
-        details: `Viewed file: ${file.originalName}`
+        action: 'FILE_VIEW',
+        details: `Viewed file: ${file.originalName}`,
+        ipAddress: getClientIP(request),
+        userAgent: getUserAgent(request)
       }
     })
 

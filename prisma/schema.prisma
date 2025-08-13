@@ -22,6 +22,12 @@ model User {
   isActive    Boolean  @default(false)
   isExternal  Boolean  @default(false)
   avatar      String?
+  department  String?
+  title       String?
+  employeeId  String?  @unique
+  mobile      String?
+  photo       String?
+  phoneExt    String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -132,6 +138,8 @@ enum ActivityType {
   FILE_VIEW
   FOLDER_CREATE
   USER_INVITE
+  USER_REGISTER
+  PROFILE_UPDATE
   PASSWORD_CHANGE
 }
 

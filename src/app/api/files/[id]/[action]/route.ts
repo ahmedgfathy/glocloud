@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { getClientIP, getUserAgent, generateActivityId } from '@/lib/utils'
 
 export async function POST(
   request: NextRequest,
@@ -26,7 +27,7 @@ export async function POST(
     }
 
     // Generate short activity ID
-    const activityId = `act_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`
+    const activityId = generateActivityId()
 
     switch (action) {
       case 'view':
@@ -36,8 +37,10 @@ export async function POST(
             id: activityId,
             userId: session.user.id,
             fileId: fileId,
-            action: 'FILE_DOWNLOAD',
-            details: `Viewed file: ${file.originalName}`
+            action: 'FILE_VIEW',
+            details: `Viewed file: ${file.originalName}`,
+            ipAddress: getClientIP(request),
+            userAgent: getUserAgent(request)
           }
         })
         
@@ -100,11 +103,13 @@ export async function POST(
         // Log sharing activity
         await prisma.activity.create({
           data: {
-            id: `act_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+            id: generateActivityId(),
             userId: session.user.id,
             fileId: fileId,
             action: 'FILE_SHARE',
-            details: `Shared file ${file.originalName} with ${targetUser.email} (${permissions})`
+            details: `Shared file ${file.originalName} with ${targetUser.email} (${permissions})`,
+            ipAddress: getClientIP(request),
+            userAgent: getUserAgent(request)
           }
         })
 
@@ -128,10 +133,12 @@ export async function POST(
         // Log deletion
         await prisma.activity.create({
           data: {
-            id: `act_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+            id: generateActivityId(),
             userId: session.user.id,
             action: 'FILE_DELETE',
-            details: `Deleted ${file.isFolder ? 'folder' : 'file'}: ${file.originalName}`
+            details: `Deleted ${file.isFolder ? 'folder' : 'file'}: ${file.originalName}`,
+            ipAddress: getClientIP(request),
+            userAgent: getUserAgent(request)
           }
         })
 

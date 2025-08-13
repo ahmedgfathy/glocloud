@@ -4,7 +4,17 @@ import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { redirect } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
-import { ShareIcon, EyeIcon, ArrowDownTrayIcon } from '@heroicons/react/24/outline'
+import { 
+  ShareIcon, 
+  EyeIcon, 
+  ArrowDownTrayIcon, 
+  DocumentIcon,
+  FolderIcon,
+  CalendarIcon,
+  UserIcon,
+  ShieldCheckIcon,
+  ClockIcon
+} from '@heroicons/react/24/outline'
 
 interface SharedFile {
   id: string
@@ -61,32 +71,83 @@ export default function SharedPage() {
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffTime = Math.abs(now.getTime() - date.getTime())
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    
+    if (diffDays === 1) return 'Yesterday'
+    if (diffDays < 7) return `${diffDays} days ago`
+    if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`
+    
+    return date.toLocaleDateString('en-EG', {
+      timeZone: 'Africa/Cairo',
       year: 'numeric',
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      hour12: false
     })
   }
 
   const getPermissionBadge = (permission: string) => {
-    const colors = {
-      VIEW: 'bg-blue-100 text-blue-800',
-      DOWNLOAD: 'bg-green-100 text-green-800',
-      EDIT: 'bg-yellow-100 text-yellow-800'
+    const configs = {
+      VIEW: { 
+        bg: 'bg-gradient-to-r from-blue-50 to-blue-100', 
+        text: 'text-blue-700', 
+        border: 'border-blue-200',
+        icon: EyeIcon
+      },
+      DOWNLOAD: { 
+        bg: 'bg-gradient-to-r from-green-50 to-green-100', 
+        text: 'text-green-700', 
+        border: 'border-green-200',
+        icon: ArrowDownTrayIcon
+      },
+      EDIT: { 
+        bg: 'bg-gradient-to-r from-amber-50 to-amber-100', 
+        text: 'text-amber-700', 
+        border: 'border-amber-200',
+        icon: ShieldCheckIcon
+      }
     }
-    return colors[permission as keyof typeof colors] || 'bg-gray-100 text-gray-800'
+    return configs[permission as keyof typeof configs] || {
+      bg: 'bg-gray-100', 
+      text: 'text-gray-700', 
+      border: 'border-gray-200',
+      icon: ShieldCheckIcon
+    }
+  }
+
+  const getFileIcon = (mimeType: string, isFolder: boolean) => {
+    if (isFolder) return FolderIcon
+    if (mimeType.includes('image')) return '🖼️'
+    if (mimeType.includes('video')) return '🎥'
+    if (mimeType.includes('audio')) return '🎵'
+    if (mimeType.includes('pdf')) return '📕'
+    if (mimeType.includes('word')) return '📘'
+    if (mimeType.includes('excel') || mimeType.includes('sheet')) return '📊'
+    if (mimeType.includes('powerpoint') || mimeType.includes('presentation')) return '📋'
+    if (mimeType.includes('zip') || mimeType.includes('rar')) return '🗜️'
+    return DocumentIcon
   }
 
   const handleView = (fileId: string) => {
-    window.open(`/api/files/${fileId}/view`, '_blank')
+    // Open in new tab to avoid affecting dashboard navigation
+    const newWindow = window.open(`/api/files/${fileId}/view`, '_blank', 'noopener,noreferrer')
+    if (newWindow) {
+      newWindow.focus()
+    }
   }
 
   const handleDownload = (fileId: string, fileName: string) => {
+    // Create download link that doesn't navigate away
     const link = document.createElement('a')
     link.href = `/api/files/${fileId}/download`
     link.download = fileName
+    link.target = '_blank'
+    link.rel = 'noopener noreferrer'
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -94,149 +155,228 @@ export default function SharedPage() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
         <Sidebar />
-        <div className="flex-1 ml-64 p-8">
+        <main className="ml-64 p-8">
           <div className="max-w-7xl mx-auto">
             <div className="animate-pulse">
-              <div className="h-8 bg-gray-300 rounded w-48 mb-6"></div>
-              <div className="space-y-4">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="h-16 bg-gray-300 rounded"></div>
+              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200 mb-8">
+                <div className="h-8 bg-gray-300 rounded-lg w-64 mb-4"></div>
+                <div className="h-4 bg-gray-200 rounded w-96"></div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+                    <div className="h-12 bg-gray-300 rounded-lg mb-4"></div>
+                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                  </div>
                 ))}
               </div>
             </div>
           </div>
-        </div>
+        </main>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <Sidebar />
-      <div className="flex-1 ml-64 p-8">
+      <main className="ml-64 p-8">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-              <ShareIcon className="h-8 w-8 mr-3 text-blue-600" />
-              Shared with Me
-            </h1>
-            <p className="text-gray-600 mt-2">
-              Files and folders that have been shared with you
-            </p>
+          {/* Header Section */}
+          <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200 mb-8">
+            <div className="flex items-center space-x-4 mb-4">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <ShareIcon className="h-8 w-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                  Shared with Me
+                </h1>
+                <p className="text-gray-600 text-lg mt-1">
+                  Files and folders that have been shared with you
+                </p>
+              </div>
+            </div>
+            
+            {/* Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-blue-600 text-sm font-medium">Total Shared</p>
+                    <p className="text-2xl font-bold text-blue-700">{files.length}</p>
+                  </div>
+                  <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                    <ShareIcon className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border border-green-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-green-600 text-sm font-medium">Downloadable</p>
+                    <p className="text-2xl font-bold text-green-700">
+                      {files.filter(f => f.share.permissions === 'DOWNLOAD' || f.share.permissions === 'EDIT').length}
+                    </p>
+                  </div>
+                  <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
+                    <ArrowDownTrayIcon className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 border border-purple-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-purple-600 text-sm font-medium">Folders</p>
+                    <p className="text-2xl font-bold text-purple-700">
+                      {files.filter(f => f.isFolder).length}
+                    </p>
+                  </div>
+                  <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
+                    <FolderIcon className="h-6 w-6 text-white" />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
+          {/* Content */}
           {files.length === 0 ? (
-            <div className="text-center py-12">
-              <ShareIcon className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
-                No shared files
-              </h3>
-              <p className="text-gray-500">
-                Files shared with you will appear here
-              </p>
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-12">
+              <div className="text-center">
+                <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <ShareIcon className="h-12 w-12 text-gray-400" />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">
+                  No shared files yet
+                </h3>
+                <p className="text-gray-500 text-lg max-w-md mx-auto">
+                  When someone shares files or folders with you, they'll appear here for easy access.
+                </p>
+              </div>
             </div>
           ) : (
-            <div className="bg-white shadow-sm rounded-lg overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Name
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Shared By
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Permission
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Size
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Shared Date
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Expires
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {files.map((file) => (
-                      <tr key={file.id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className="flex-shrink-0 h-10 w-10">
-                              <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${
-                                file.isFolder 
-                                  ? 'bg-blue-100 text-blue-600' 
-                                  : 'bg-gray-100 text-gray-600'
-                              }`}>
-                                {file.isFolder ? '📁' : '📄'}
-                              </div>
-                            </div>
-                            <div className="ml-4">
-                              <div className="text-sm font-medium text-gray-900">
-                                {file.originalName}
-                              </div>
-                              <div className="text-sm text-gray-500">
-                                {file.mimeType}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-900">{file.share.sharedBy.name}</div>
-                          <div className="text-sm text-gray-500">{file.share.sharedBy.email}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPermissionBadge(file.share.permissions)}`}>
-                            {file.share.permissions}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {file.isFolder ? '-' : formatFileSize(file.size)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {formatDate(file.createdAt)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {file.share.expiresAt ? formatDate(file.share.expiresAt) : 'Never'}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={() => handleView(file.id)}
-                              className="text-blue-600 hover:text-blue-900 p-1"
-                              title="View"
-                            >
-                              <EyeIcon className="h-4 w-4" />
-                            </button>
-                            {(file.share.permissions === 'DOWNLOAD' || file.share.permissions === 'EDIT') && (
-                              <button
-                                onClick={() => handleDownload(file.id, file.originalName)}
-                                className="text-green-600 hover:text-green-900 p-1"
-                                title="Download"
-                              >
-                                <ArrowDownTrayIcon className="h-4 w-4" />
-                              </button>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {files.map((file) => {
+                const permissionConfig = getPermissionBadge(file.share.permissions)
+                const FileIconComponent = getFileIcon(file.mimeType, file.isFolder)
+                const isExpiring = file.share.expiresAt && new Date(file.share.expiresAt) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+                
+                return (
+                  <div key={file.id} className="bg-white rounded-xl shadow-lg border border-gray-200 hover:shadow-xl transition-all duration-200 hover:scale-105 group">
+                    {/* File Header */}
+                    <div className="p-6 border-b border-gray-100">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center space-x-3">
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
+                            file.isFolder 
+                              ? 'bg-gradient-to-br from-blue-500 to-blue-600 text-white' 
+                              : 'bg-gradient-to-br from-gray-100 to-gray-200 text-gray-600'
+                          }`}>
+                            {typeof FileIconComponent === 'string' ? (
+                              <span className="text-2xl">{FileIconComponent}</span>
+                            ) : (
+                              <FileIconComponent className="h-6 w-6" />
                             )}
                           </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-lg font-semibold text-gray-900 truncate group-hover:text-blue-600 transition-colors">
+                              {file.originalName}
+                            </h3>
+                            <p className="text-sm text-gray-500 truncate">
+                              {file.isFolder ? 'Folder' : file.mimeType.split('/')[1]?.toUpperCase() || 'File'}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        {/* Permission Badge */}
+                        <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${permissionConfig.bg} ${permissionConfig.text} ${permissionConfig.border}`}>
+                          <permissionConfig.icon className="h-3 w-3 mr-1" />
+                          {file.share.permissions}
+                        </div>
+                      </div>
+                      
+                      {/* Expiration Warning */}
+                      {isExpiring && (
+                        <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg p-3 mb-4">
+                          <div className="flex items-center space-x-2">
+                            <ClockIcon className="h-4 w-4 text-amber-600" />
+                            <span className="text-sm font-medium text-amber-700">
+                              Expires {formatDate(file.share.expiresAt!)}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* File Details */}
+                    <div className="p-6 space-y-4">
+                      {/* Shared By */}
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center">
+                          <UserIcon className="h-4 w-4 text-white" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">{file.share.sharedBy.name}</p>
+                          <p className="text-xs text-gray-500">{file.share.sharedBy.email}</p>
+                        </div>
+                      </div>
+
+                      {/* File Info */}
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <p className="text-gray-500 mb-1">Size</p>
+                          <p className="font-medium text-gray-900">
+                            {file.isFolder ? '-' : formatFileSize(file.size)}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-gray-500 mb-1">Shared</p>
+                          <p className="font-medium text-gray-900">{formatDate(file.createdAt)}</p>
+                        </div>
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex space-x-2 pt-4 border-t border-gray-100">
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                            handleView(file.id)
+                          }}
+                          className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm font-medium py-2 px-4 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 flex items-center justify-center space-x-2"
+                        >
+                          <EyeIcon className="h-4 w-4" />
+                          <span>View</span>
+                        </button>
+                        
+                        {(file.share.permissions === 'DOWNLOAD' || file.share.permissions === 'EDIT') && (
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              handleDownload(file.id, file.originalName)
+                            }}
+                            className="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white text-sm font-medium py-2 px-4 rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 flex items-center justify-center space-x-2"
+                          >
+                            <ArrowDownTrayIcon className="h-4 w-4" />
+                            <span>Download</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           )}
         </div>
-      </div>
+      </main>
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { prisma } from '@/lib/prisma'
+import { generateActivityId } from '@/lib/utils'
 import bcrypt from 'bcryptjs'
 
 export const authOptions: NextAuthOptions = {
@@ -36,9 +37,12 @@ export const authOptions: NextAuthOptions = {
         // Log login activity
         await prisma.activity.create({
           data: {
+            id: generateActivityId(),
             userId: user.id,
             action: 'LOGIN',
-            details: 'User logged in successfully'
+            details: 'User logged in successfully',
+            ipAddress: 'unknown', // Will be updated by middleware
+            userAgent: 'unknown'  // Will be updated by middleware
           }
         })
 

@@ -192,9 +192,31 @@ export default function AnalyticsPage() {
                                   <p className="text-sm text-gray-700 font-medium">
                                     {activity.details}
                                   </p>
+                                  <div className="mt-1 flex items-center space-x-4 text-xs text-gray-500">
+                                    <span className="font-medium">User: {activity.user?.name || 'Unknown'}</span>
+                                    {activity.ipAddress && activity.ipAddress !== 'unknown' && (
+                                      <span className="bg-gray-100 px-2 py-1 rounded text-xs font-mono">
+                                        IP: {activity.ipAddress}
+                                      </span>
+                                    )}
+                                    {activity.userAgent && activity.userAgent !== 'unknown' && (
+                                      <span className="truncate max-w-xs">
+                                        {activity.userAgent.split(' ')[0]}
+                                      </span>
+                                    )}
+                                  </div>
                                 </div>
                                 <div className="text-right text-sm whitespace-nowrap text-gray-500">
-                                  {new Date(activity.createdAt).toLocaleDateString()}
+                                  <div>{new Date(activity.createdAt).toLocaleDateString('en-GB', { timeZone: 'Africa/Cairo' })}</div>
+                                  <div className="text-xs">
+                                    {new Date(activity.createdAt).toLocaleTimeString('en-GB', { 
+                                      timeZone: 'Africa/Cairo',
+                                      hour12: false,
+                                      hour: '2-digit',
+                                      minute: '2-digit',
+                                      second: '2-digit'
+                                    })}
+                                  </div>
                                 </div>
                               </div>
                             </div>

@@ -4,13 +4,18 @@ import { useSession } from 'next-auth/react'
 import { redirect } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import FileUpload from '@/components/FileUpload'
-import FileList from '@/components/FileList'
 import Sidebar from '@/components/Sidebar'
+import Link from 'next/link'
 import { 
   FolderIcon, 
   CloudIcon, 
   ShareIcon, 
-  CloudArrowUpIcon 
+  CloudArrowUpIcon,
+  ClockIcon,
+  DocumentIcon,
+  ArrowDownTrayIcon,
+  TrashIcon,
+  EyeIcon
 } from '@heroicons/react/24/outline'
 
 interface UserStats {
@@ -19,20 +24,33 @@ interface UserStats {
   sharedFiles: number
 }
 
+interface Activity {
+  id: string
+  action: string
+  details: string
+  createdAt: string
+  file?: {
+    name: string
+    originalName: string
+  }
+}
+
 export default function Dashboard() {
   const { data: session, status } = useSession()
-  const [currentFolder, setCurrentFolder] = useState<string | null>(null)
   const [refreshTrigger, setRefreshTrigger] = useState(0)
   const [userStats, setUserStats] = useState<UserStats>({
     totalFiles: 0,
     storageUsed: 0,
     sharedFiles: 0
   })
+  const [activities, setActivities] = useState<Activity[]>([])
   const [statsLoading, setStatsLoading] = useState(true)
+  const [activitiesLoading, setActivitiesLoading] = useState(true)
 
   useEffect(() => {
     if (session) {
       fetchUserStats()
+      fetchActivities()
     }
   }, [session, refreshTrigger])
 
@@ -60,6 +78,20 @@ export default function Dashboard() {
     }
   }
 
+  const fetchActivities = async () => {
+    try {
+      const response = await fetch('/api/activities')
+      if (response.ok) {
+        const data = await response.json()
+        setActivities(data.activities || [])
+      }
+    } catch (error) {
+      console.error('Error fetching activities:', error)
+    } finally {
+      setActivitiesLoading(false)
+    }
+  }
+
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 GB'
     const k = 1024
@@ -84,6 +116,7 @@ export default function Dashboard() {
   const handleUploadSuccess = () => {
     setRefreshTrigger(prev => prev + 1)
     fetchUserStats()
+    fetchActivities()
   }
 
   return (
@@ -155,8 +188,8 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="lg:col-span-1">
               <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6">
                   <h2 className="text-xl font-bold text-white flex items-center">
@@ -167,18 +200,46 @@ export default function Dashboard() {
                 </div>
                 <div className="p-6">
                   <FileUpload 
-                    parentId={currentFolder}
+                    parentId={null}
                     onUploadSuccess={handleUploadSuccess}
                   />
                 </div>
               </div>
+            </div>
 
+            {/* Quick Actions */}
+            <div className="lg:col-span-1">
               <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-                <FileList 
-                  parentId={currentFolder}
-                  onFolderClick={setCurrentFolder}
-                  refreshTrigger={refreshTrigger}
-                />
+                <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-6">
+                  <h2 className="text-xl font-bold text-white flex items-center">
+                    <FolderIcon className="h-6 w-6 mr-3" />
+                    Quick Actions
+                  </h2>
+                  <p className="text-green-100 mt-1">Access your files and folders</p>
+                </div>
+                <div className="p-6">
+                  <div className="grid grid-cols-2 gap-4">
+                    <Link 
+                      href="/dashboard/files"
+                      className="group flex flex-col items-center p-4 bg-blue-50 hover:bg-blue-100 rounded-xl border border-blue-200 transition-all duration-200 hover:scale-105"
+                    >
+                      <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center mb-3 group-hover:bg-blue-600 transition-colors">
+                        <FolderIcon className="h-6 w-6 text-white" />
+                      </div>
+                      <span className="text-blue-700 font-medium text-sm">My Files</span>
+                    </Link>
+
+                    <Link 
+                      href="/dashboard/shared"
+                      className="group flex flex-col items-center p-4 bg-purple-50 hover:bg-purple-100 rounded-xl border border-purple-200 transition-all duration-200 hover:scale-105"
+                    >
+                      <div className="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center mb-3 group-hover:bg-purple-600 transition-colors">
+                        <ShareIcon className="h-6 w-6 text-white" />
+                      </div>
+                      <span className="text-purple-700 font-medium text-sm">Shared Files</span>
+                    </Link>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -210,17 +271,80 @@ export default function Dashboard() {
 
               <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
                 <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                  <div className="w-6 h-6 bg-gradient-to-br from-green-500 to-blue-500 rounded-lg mr-3"></div>
+                  <div className="w-6 h-6 bg-gradient-to-br from-green-500 to-blue-500 rounded-lg mr-3 flex items-center justify-center">
+                    <ClockIcon className="h-3 w-3 text-white" />
+                  </div>
                   Recent Activity
                 </h3>
                 <div className="space-y-3">
-                  <div className="text-center py-8">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <FolderIcon className="h-8 w-8 text-gray-400" />
+                  {activitiesLoading ? (
+                    <div className="text-center py-4">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
                     </div>
-                    <p className="text-gray-500 text-sm">No recent activity</p>
-                    <p className="text-gray-400 text-xs">Upload files to see activity here</p>
-                  </div>
+                  ) : activities.length > 0 ? (
+                    activities.slice(0, 5).map((activity) => (
+                      <div key={activity.id} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                        <div className="flex-shrink-0">
+                          {activity.action === 'FILE_UPLOAD' && (
+                            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                              <CloudArrowUpIcon className="h-4 w-4 text-green-600" />
+                            </div>
+                          )}
+                          {activity.action === 'FILE_DOWNLOAD' && (
+                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                              <ArrowDownTrayIcon className="h-4 w-4 text-blue-600" />
+                            </div>
+                          )}
+                          {activity.action === 'FILE_VIEW' && (
+                            <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                              <EyeIcon className="h-4 w-4 text-purple-600" />
+                            </div>
+                          )}
+                          {activity.action === 'FILE_DELETE' && (
+                            <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                              <TrashIcon className="h-4 w-4 text-red-600" />
+                            </div>
+                          )}
+                          {activity.action === 'LOGIN' && (
+                            <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                              <div className="w-2 h-2 bg-indigo-600 rounded-full"></div>
+                            </div>
+                          )}
+                          {!['FILE_UPLOAD', 'FILE_DOWNLOAD', 'FILE_VIEW', 'FILE_DELETE', 'LOGIN'].includes(activity.action) && (
+                            <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                              <DocumentIcon className="h-4 w-4 text-gray-600" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            {activity.details || activity.action.replace('_', ' ').toLowerCase()}
+                          </p>
+                          {activity.file && (
+                            <p className="text-xs text-gray-500 truncate">
+                              {activity.file.originalName || activity.file.name}
+                            </p>
+                          )}
+                          <p className="text-xs text-gray-400">
+                            {new Date(activity.createdAt).toLocaleDateString('en-GB', { timeZone: 'Africa/Cairo' })} {new Date(activity.createdAt).toLocaleTimeString('en-GB', { 
+                              timeZone: 'Africa/Cairo',
+                              hour12: false,
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8">
+                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <ClockIcon className="h-8 w-8 text-gray-400" />
+                      </div>
+                      <p className="text-gray-500 text-sm">No recent activity</p>
+                      <p className="text-gray-400 text-xs">Upload files to see activity here</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

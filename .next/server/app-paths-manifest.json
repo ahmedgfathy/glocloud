@@ -1,7 +1,13 @@
 {
-  "/admin/users/page": "app/admin/users/page.js",
-  "/admin/analytics/page": "app/admin/analytics/page.js",
+  "/api/auth/[...nextauth]/route": "app/api/auth/[...nextauth]/route.js",
+  "/api/files/route": "app/api/files/route.js",
+  "/api/admin/analytics/route": "app/api/admin/analytics/route.js",
+  "/api/users/route": "app/api/users/route.js",
+  "/api/activities/route": "app/api/activities/route.js",
+  "/dashboard/files/page": "app/dashboard/files/page.js",
   "/dashboard/page": "app/dashboard/page.js",
+  "/dashboard/shared/page": "app/dashboard/shared/page.js",
   "/admin/settings/page": "app/admin/settings/page.js",
-  "/auth/signin/page": "app/auth/signin/page.js"
+  "/admin/users/page": "app/admin/users/page.js",
+  "/admin/analytics/page": "app/admin/analytics/page.js"
 }

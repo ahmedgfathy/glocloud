@@ -63,7 +63,7 @@ export default function FilesPage() {
                   <h1 className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
                     My Files
                   </h1>
-                  <p className="text-gray-600 mt-1">Browse and manage your files and folders</p>
+                  <p className="text-gray-600 mt-1">Organize and share your documents</p>
                 </div>
                 
                 {currentFolder && (

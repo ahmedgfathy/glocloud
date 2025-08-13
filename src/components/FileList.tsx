@@ -72,25 +72,41 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger }: Fi
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diffTime = Math.abs(now.getTime() - date.getTime())
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    
+    if (diffDays === 1) return 'Yesterday'
+    if (diffDays < 7) return `${diffDays} days ago`
+    if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`
+    
+    return date.toLocaleDateString('en-EG', {
+      timeZone: 'Africa/Cairo',
       year: 'numeric',
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
+      hour12: false
     })
   }
 
   const handleView = (fileId: string) => {
-    // Open file in new tab for viewing
-    window.open(`/api/files/${fileId}/view`, '_blank')
+    // Open file in new tab to avoid affecting dashboard navigation
+    const newWindow = window.open(`/api/files/${fileId}/view`, '_blank', 'noopener,noreferrer')
+    if (newWindow) {
+      newWindow.focus()
+    }
   }
 
   const handleDownload = (fileId: string, fileName: string) => {
-    // Create download link
+    // Create download link that doesn't navigate away
     const link = document.createElement('a')
     link.href = `/api/files/${fileId}/download`
     link.download = fileName
+    link.target = '_blank'
+    link.rel = 'noopener noreferrer'
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
@@ -181,13 +197,20 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger }: Fi
             
             {/* File Name */}
             <button
-              onClick={() => file.isFolder && onFolderClick?.(file.id)}
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                if (file.isFolder && onFolderClick) {
+                  onFolderClick(file.id)
+                }
+              }}
               className={`text-sm font-medium truncate w-full ${
                 file.isFolder 
                   ? 'text-blue-600 hover:text-blue-800 cursor-pointer hover:underline' 
                   : 'text-gray-900'
               }`}
               title={file.originalName}
+              disabled={!file.isFolder}
             >
               {file.originalName}
             </button>
@@ -202,14 +225,22 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger }: Fi
               {!file.isFolder && (
                 <>
                   <button
-                    onClick={() => handleView(file.id)}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      handleView(file.id)
+                    }}
                     className="p-1.5 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
                     title="View file"
                   >
                     <EyeIcon className="h-4 w-4" />
                   </button>
                   <button
-                    onClick={() => handleDownload(file.id, file.originalName)}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      handleDownload(file.id, file.originalName)
+                    }}
                     className="p-1.5 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50 transition-colors"
                     title="Download file"
                   >
@@ -218,14 +249,22 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger }: Fi
                 </>
               )}
               <button
-                onClick={() => handleShare(file.id, file.originalName)}
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  handleShare(file.id, file.originalName)
+                }}
                 className="p-1.5 rounded-lg text-gray-400 hover:text-purple-600 hover:bg-purple-50 transition-colors"
                 title="Share"
               >
                 <ShareIcon className="h-4 w-4" />
               </button>
               <button
-                onClick={() => confirmDelete(file.id)}
+                onClick={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  confirmDelete(file.id)
+                }}
                 className="p-1.5 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 transition-colors"
                 title="Delete"
               >
@@ -276,12 +315,19 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger }: Fi
                   )}
                   <div className="min-w-0 flex-1">
                     <button
-                      onClick={() => file.isFolder && onFolderClick?.(file.id)}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        if (file.isFolder && onFolderClick) {
+                          onFolderClick(file.id)
+                        }
+                      }}
                       className={`text-sm font-semibold truncate block ${
                         file.isFolder 
                           ? 'text-blue-600 hover:text-blue-800 cursor-pointer hover:underline' 
                           : 'text-gray-900'
                       }`}
+                      disabled={!file.isFolder}
                     >
                       {file.originalName}
                     </button>
@@ -316,14 +362,22 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger }: Fi
                   {!file.isFolder && (
                     <>
                       <button
-                        onClick={() => handleView(file.id)}
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          handleView(file.id)
+                        }}
                         className="inline-flex items-center p-2 border border-transparent rounded-xl text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200"
                         title="View file"
                       >
                         <EyeIcon className="h-4 w-4" />
                       </button>
                       <button
-                        onClick={() => handleDownload(file.id, file.originalName)}
+                        onClick={(e) => {
+                          e.preventDefault()
+                          e.stopPropagation()
+                          handleDownload(file.id, file.originalName)
+                        }}
                         className="inline-flex items-center p-2 border border-transparent rounded-xl text-gray-400 hover:text-green-600 hover:bg-green-50 transition-all duration-200"
                         title="Download file"
                       >
@@ -332,14 +386,22 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger }: Fi
                     </>
                   )}
                   <button
-                    onClick={() => handleShare(file.id, file.originalName)}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      handleShare(file.id, file.originalName)
+                    }}
                     className="inline-flex items-center p-2 border border-transparent rounded-xl text-gray-400 hover:text-purple-600 hover:bg-purple-50 transition-all duration-200"
                     title="Share"
                   >
                     <ShareIcon className="h-4 w-4" />
                   </button>
                   <button
-                    onClick={() => confirmDelete(file.id)}
+                    onClick={(e) => {
+                      e.preventDefault()
+                      e.stopPropagation()
+                      confirmDelete(file.id)
+                    }}
                     className="inline-flex items-center p-2 border border-transparent rounded-xl text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all duration-200"
                     title="Delete"
                   >
@@ -404,8 +466,8 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger }: Fi
         <div className="px-8 py-6 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-gray-100">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-xl font-bold text-gray-900">Browse and manage your files</h3>
-              <p className="text-sm text-gray-600 mt-1">View, organize, and share your documents</p>
+              <h3 className="text-xl font-bold text-gray-900">Files & Folders</h3>
+              <p className="text-sm text-gray-600 mt-1">Organize and share your documents</p>
             </div>
             <div className="flex bg-white rounded-xl shadow-sm border border-gray-200 p-1">
               <button

@@ -17,29 +17,36 @@ export async function GET() {
     }
 
     // Get analytics data
-    const [totalUsers, totalFiles, totalShares, files, recentActivities] = await Promise.all([
+    const [totalUsers, totalFiles, totalShares, files] = await Promise.all([
       prisma.user.count(),
       prisma.file.count(),
       prisma.fileShare.count(),
       prisma.file.findMany({
         select: { size: true }
-      }),
-      prisma.activity.findMany({
-        take: 10,
-        orderBy: { createdAt: 'desc' },
-        include: {
-          user: {
-            select: { name: true, email: true }
-          },
-          file: {
-            select: { name: true }
-          }
-        }
       })
     ])
 
-    // Calculate total storage used
-    const storageUsed = files.reduce((total: number, file: { size: number }) => total + file.size, 0)
+    // Calculate storage used
+    const storageUsed = files.reduce((total: number, file: any) => total + (file.size || 0), 0)
+
+    // Get recent activities with user and file info
+    const recentActivities = await prisma.activity.findMany({
+      take: 10,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: {
+          select: {
+            name: true,
+            email: true
+          }
+        },
+        file: {
+          select: {
+            name: true
+          }
+        }
+      }
+    })
 
     const analytics = {
       totalUsers,
@@ -50,6 +57,8 @@ export async function GET() {
         id: activity.id,
         action: activity.action,
         details: activity.details,
+        ipAddress: activity.ipAddress,
+        userAgent: activity.userAgent,
         createdAt: activity.createdAt,
         user: activity.user,
         file: activity.file

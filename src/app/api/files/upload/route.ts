@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { getClientIP, getUserAgent, generateActivityId } from '@/lib/utils'
 import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
 import { v4 as uuidv4 } from 'uuid'
@@ -56,10 +57,13 @@ export async function POST(request: NextRequest) {
     // Log upload activity
     await prisma.activity.create({
       data: {
+        id: generateActivityId(),
         userId: session.user.id,
         fileId: fileRecord.id,
         action: 'FILE_UPLOAD',
-        details: `Uploaded file: ${file.name}`
+        details: `Uploaded file: ${file.name}`,
+        ipAddress: getClientIP(request),
+        userAgent: getUserAgent(request)
       }
     })
 

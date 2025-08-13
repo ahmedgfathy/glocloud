@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getClientIP, getUserAgent, generateActivityId } from '@/lib/utils'
 import bcrypt from 'bcryptjs'
 
 export async function POST(request: NextRequest) {
@@ -61,7 +62,7 @@ export async function POST(request: NextRequest) {
     console.log('Creating user in database...')
     
     // Generate a simple ID (fallback if cuid() doesn't work)
-    const userId = Date.now().toString() + Math.random().toString(36).substr(2, 6)
+    const userId = generateActivityId()
 
     // Create user (inactive by default, waiting for admin approval)
     const user = await prisma.user.create({
@@ -82,12 +83,12 @@ export async function POST(request: NextRequest) {
     try {
       await prisma.activity.create({
         data: {
-          id: Date.now().toString() + Math.random().toString(36).substr(2, 6),
+          id: generateActivityId(),
           userId: user.id,
-          action: 'USER_INVITE',
+          action: 'USER_REGISTER',
           details: 'User registered and waiting for approval',
-          ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
-          userAgent: request.headers.get('user-agent') || 'unknown'
+          ipAddress: getClientIP(request),
+          userAgent: getUserAgent(request)
         }
       })
       console.log('Activity logged successfully')
