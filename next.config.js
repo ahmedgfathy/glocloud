@@ -3,6 +3,10 @@ const nextConfig = {
   images: {
     domains: ['localhost'],
   },
+  devIndicators: {
+    appIsrStatus: false,
+    buildActivity: false
+  },
 }
 
 module.exports = nextConfig

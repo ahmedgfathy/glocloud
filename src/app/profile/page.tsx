@@ -56,6 +56,25 @@ export default function ProfilePage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
 
+  // Predefined list of departments
+  const predefinedDepartments = [
+    'Human Resources',
+    'Information Technology',
+    'Finance',
+    'Marketing',
+    'Sales',
+    'Operations',
+    'Engineering',
+    'Design',
+    'Customer Service',
+    'Administration',
+    'Legal',
+    'Quality Assurance',
+    'Research and Development',
+    'Procurement',
+    'Security'
+  ].sort()
+
   useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/auth/signin')
@@ -390,15 +409,23 @@ export default function ProfilePage() {
                           Department
                         </label>
                         <div className="relative">
-                          <BuildingOfficeIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                          <input
-                            type="text"
+                          <BuildingOfficeIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 z-10" />
+                          <select
                             value={formData.department}
                             onChange={(e) => setFormData({...formData, department: e.target.value})}
                             disabled={!editing}
-                            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
-                            placeholder="Enter your department"
-                          />
+                            className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500 appearance-none bg-white"
+                          >
+                            <option value="">Select a department</option>
+                            {predefinedDepartments.map(dept => (
+                              <option key={dept} value={dept}>{dept}</option>
+                            ))}
+                          </select>
+                          <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <svg className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                            </svg>
+                          </div>
                         </div>
                       </div>
 

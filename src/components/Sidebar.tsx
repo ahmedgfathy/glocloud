@@ -90,14 +90,14 @@ export default function Sidebar() {
       {/* Company Logo Section */}
       <div className="px-6 py-6 bg-gradient-to-r from-black to-gray-900 border-b border-gray-700 flex-shrink-0">
         <div className="flex items-center space-x-4">
-          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl border-2 border-blue-400/30">
+          <div className="w-16 h-16 bg-white rounded-xl flex items-center justify-center shadow-2xl border-4 border-gray-200 ring-2 ring-gray-300">
             {companySettings.companyLogo ? (
               <Image
                 src={companySettings.companyLogo}
                 alt="Company Logo"
-                width={40}
-                height={40}
-                className="w-10 h-10 object-contain"
+                width={44}
+                height={44}
+                className="w-11 h-11 object-contain filter drop-shadow-sm"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none'
                   const fallbackIcon = e.currentTarget.nextElementSibling as HTMLElement
@@ -107,9 +107,9 @@ export default function Sidebar() {
                 }}
               />
             ) : (
-              <CloudIcon className="h-10 w-10 text-white" />
+              <CloudIcon className="h-11 w-11 text-gray-500 filter drop-shadow-sm" />
             )}
-            <CloudIcon className="h-10 w-10 text-white hidden" />
+            <CloudIcon className="h-11 w-11 text-gray-500 hidden filter drop-shadow-sm" />
           </div>
           <div className="flex-1">
             <h1 className="text-white text-2xl font-bold tracking-tight mb-1">{companySettings.companyName}</h1>
