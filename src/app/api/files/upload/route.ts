@@ -39,8 +39,8 @@ export async function POST(request: NextRequest) {
     // Get current week number
     const currentWeek = getCurrentWeekNumber();
     
-    // Create employee-specific upload path: uploads/{employeeId}/week-{weekNumber}/
-    const employeeUploadPath = createEmployeeUploadPath(employeeIdentifier, currentWeek);
+    // Create employee-specific upload path: uploads/emp_{employeeId}_{userHash}/week-{weekNumber}/
+    const employeeUploadPath = createEmployeeUploadPath(employeeIdentifier, session.user.id, currentWeek);
     const fullUploadDir = join(process.cwd(), employeeUploadPath);
     
     // Create directory structure if it doesn't exist

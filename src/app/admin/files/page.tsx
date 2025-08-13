@@ -222,21 +222,33 @@ export default function FileStructurePage() {
               filteredFiles.map((employeeData) => (
                 <div key={employeeData.employeeId} className="bg-white rounded-xl shadow-lg overflow-hidden">
                   {/* Employee Header */}
-                  <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 border-b border-gray-200">
+                  <div className="bg-gradient-to-r from-slate-50 to-blue-50 p-6 border-b border-gray-200">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
-                          <UserIcon className="h-6 w-6 text-white" />
+                      <div className="flex items-center space-x-6">
+                        <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-xl border-2 border-blue-400/30">
+                          <UserIcon className="h-8 w-8 text-white" />
                         </div>
                         <div>
-                          <h3 className="text-xl font-bold text-gray-900">{employeeData.employee.name}</h3>
-                          <p className="text-gray-600">{employeeData.employee.email}</p>
-                          <p className="text-sm text-blue-600 font-medium">Employee ID: {employeeData.employeeId}</p>
+                          <h3 className="text-2xl font-bold text-gray-900 mb-1">{employeeData.employee.name}</h3>
+                          <p className="text-gray-600 mb-2 flex items-center">
+                            <span className="mr-2">📧</span>
+                            {employeeData.employee.email}
+                          </p>
+                          <div className="flex items-center space-x-3">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-sm border border-blue-400/30">
+                              <span className="mr-1">🆔</span>
+                              Employee: {employeeData.employeeId}
+                            </span>
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 border border-green-300">
+                              📁 {employeeData.weeks.reduce((total, week) => total + week.fileCount, 0)} Files
+                            </span>
+                          </div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <p className="text-sm text-gray-500">Total Weeks</p>
-                        <p className="text-2xl font-bold text-blue-600">{employeeData.weeks.length}</p>
+                      <div className="text-right bg-white/60 p-4 rounded-xl border border-gray-200 shadow-sm">
+                        <p className="text-sm text-gray-500 mb-1">Active Weeks</p>
+                        <p className="text-3xl font-bold text-blue-600">{employeeData.weeks.length}</p>
+                        <p className="text-xs text-gray-400 mt-1">Upload Periods</p>
                       </div>
                     </div>
                   </div>
@@ -245,16 +257,21 @@ export default function FileStructurePage() {
                   <div className="p-6">
                     <div className="space-y-4">
                       {employeeData.weeks.map((week) => (
-                        <div key={week.weekKey} className="border border-gray-200 rounded-lg overflow-hidden">
+                        <div key={week.weekKey} className="border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                           {/* Week Header */}
-                          <div className="bg-gray-50 p-4 flex items-center justify-between">
-                            <div className="flex items-center space-x-3">
-                              <CalendarIcon className="h-5 w-5 text-gray-600" />
-                              <h4 className="font-semibold text-gray-900">Week {week.weekNumber}</h4>
-                              <span className="text-sm text-gray-500">({week.fileCount} files)</span>
+                          <div className="bg-gradient-to-r from-gray-50 to-slate-50 p-5 flex items-center justify-between border-b border-gray-200">
+                            <div className="flex items-center space-x-4">
+                              <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center shadow-md">
+                                <CalendarIcon className="h-5 w-5 text-white" />
+                              </div>
+                              <div>
+                                <h4 className="font-bold text-gray-900 text-lg">Week {week.weekNumber}</h4>
+                                <p className="text-sm text-gray-500">{week.fileCount} files uploaded</p>
+                              </div>
                             </div>
-                            <div className="text-sm text-gray-600">
-                              Total: {formatFileSize(week.totalSize)}
+                            <div className="text-right bg-white/80 px-4 py-2 rounded-lg border border-gray-200">
+                              <p className="text-xs text-gray-500 mb-1">Total Size</p>
+                              <p className="text-lg font-bold text-emerald-600">{formatFileSize(week.totalSize)}</p>
                             </div>
                           </div>
 

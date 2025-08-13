@@ -27,11 +27,13 @@ export function getCurrentWeekNumber(): number {
 
 /**
  * Create employee-specific upload path
- * Structure: uploads/{employeeId}/week-{weekNumber}/
+ * Structure: uploads/emp_{employeeId}_{hashedUserId}/week-{weekNumber}/
  */
-export function createEmployeeUploadPath(employeeId: string, weekNumber?: number): string {
+export function createEmployeeUploadPath(employeeId: string, userId: string, weekNumber?: number): string {
   const week = weekNumber || getCurrentWeekNumber();
-  return `uploads/${employeeId}/week-${week}`;
+  // Create a short hash of the user ID for security while keeping employee ID readable
+  const userHash = userId.substring(0, 8);
+  return `uploads/emp_${employeeId}_${userHash}/week-${week}`;
 }
 
 /**

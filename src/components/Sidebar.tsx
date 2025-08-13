@@ -73,47 +73,62 @@ export default function Sidebar() {
   ]
 
   const isActive = (path: string) => {
-    return pathname === path || pathname.startsWith(path + '/')
+    // Exact match for most paths, but special handling for dashboard vs dashboard/files
+    if (path === '/dashboard') {
+      return pathname === '/dashboard'
+    }
+    if (path === '/dashboard/files') {
+      return pathname === '/dashboard/files'
+    }
+    if (path === '/dashboard/shared') {
+      return pathname === '/dashboard/shared'
+    }
+    // For admin paths, allow sub-paths
+    if (path.startsWith('/admin/')) {
+      return pathname === path || pathname.startsWith(path + '/')
+    }
+    // Exact match for other paths
+    return pathname === path
   }
 
   return (
     <div className="fixed left-0 top-0 bottom-0 flex flex-col w-64 bg-gradient-to-b from-gray-900 to-black text-white shadow-2xl z-30">
-      {/* Combined Logo and User Info */}
-      {session?.user && (
-        <div className="px-6 py-6 bg-black border-b border-gray-700">
-          {/* Logo and Company Name */}
-          <div className="flex items-center space-x-3 mb-4">
-            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg">
-              {companySettings.companyLogo ? (
-                <Image
-                  src={companySettings.companyLogo}
-                  alt="Company Logo"
-                  width={32}
-                  height={32}
-                  className="w-8 h-8 object-contain"
-                  onError={(e) => {
-                    // Fallback to CloudIcon if logo fails to load
-                    e.currentTarget.style.display = 'none'
-                    const fallbackIcon = e.currentTarget.nextElementSibling as HTMLElement
-                    if (fallbackIcon) {
-                      fallbackIcon.classList.remove('hidden')
-                    }
-                  }}
-                />
-              ) : (
-                <CloudIcon className="h-8 w-8 text-blue-600" />
-              )}
-              <CloudIcon className="h-8 w-8 text-blue-600 hidden" />
-            </div>
-            <div className="flex-1">
-              <h1 className="text-white text-xl font-bold tracking-tight">{companySettings.companyName}</h1>
-              <p className="text-gray-300 text-xs font-medium">File Management System</p>
-            </div>
+      {/* Company Logo Section */}
+      <div className="px-6 py-6 bg-gradient-to-r from-black to-gray-900 border-b border-gray-700">
+        <div className="flex items-center space-x-4">
+          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl border-2 border-blue-400/30">
+            {companySettings.companyLogo ? (
+              <Image
+                src={companySettings.companyLogo}
+                alt="Company Logo"
+                width={40}
+                height={40}
+                className="w-10 h-10 object-contain"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none'
+                  const fallbackIcon = e.currentTarget.nextElementSibling as HTMLElement
+                  if (fallbackIcon) {
+                    fallbackIcon.classList.remove('hidden')
+                  }
+                }}
+              />
+            ) : (
+              <CloudIcon className="h-10 w-10 text-white" />
+            )}
+            <CloudIcon className="h-10 w-10 text-white hidden" />
           </div>
+          <div className="flex-1">
+            <h1 className="text-white text-2xl font-bold tracking-tight mb-1">{companySettings.companyName}</h1>
+            <p className="text-blue-300 text-sm font-medium opacity-90">Enterprise File Management</p>
+          </div>
+        </div>
+      </div>
 
-          {/* User Info */}
-          <div className="flex items-center space-x-3 p-3 bg-gray-800/50 rounded-xl">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+      {/* User Profile Section */}
+      {session?.user && (
+        <div className="px-6 py-4 bg-gray-800/40 border-b border-gray-700">
+          <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-gray-800/60 to-gray-700/60 rounded-xl border border-gray-600/30 backdrop-blur-sm">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg border-2 border-blue-400/30">
               <span className="text-white font-bold text-lg">
                 {session.user.name?.charAt(0).toUpperCase()}
               </span>
@@ -121,14 +136,14 @@ export default function Sidebar() {
             <div className="flex-1 min-w-0">
               <Link 
                 href="/profile"
-                className="text-white text-sm font-semibold truncate hover:text-blue-300 transition-colors cursor-pointer block"
+                className="text-white text-sm font-semibold truncate hover:text-blue-300 transition-colors cursor-pointer block mb-1"
               >
                 {session.user.name}
               </Link>
-              <p className="text-gray-300 text-xs truncate mb-1">
-                {session.user.email}
+              <p className="text-blue-200 text-sm font-medium truncate mb-2">
+                ID: {session.user.employeeId || session.user.id?.substring(0, 12) || 'N/A'}
               </p>
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-sm">
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-sm border border-emerald-400/30">
                 {session.user.role?.replace('_', ' ')}
               </span>
             </div>

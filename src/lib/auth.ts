@@ -51,7 +51,8 @@ export const authOptions: NextAuthOptions = {
           email: user.email,
           name: user.name,
           role: user.role,
-          isExternal: user.isExternal
+          isExternal: user.isExternal,
+          employeeId: user.employeeId
         }
       }
     })
@@ -64,6 +65,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.role = (user as any).role
         token.isExternal = (user as any).isExternal
+        token.employeeId = (user as any).employeeId
       }
       return token
     },
@@ -72,6 +74,7 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.sub!
         session.user.role = token.role as string
         session.user.isExternal = token.isExternal as boolean
+        session.user.employeeId = token.employeeId as string
       }
       return session
     }

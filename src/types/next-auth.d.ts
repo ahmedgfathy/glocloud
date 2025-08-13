@@ -6,12 +6,14 @@ declare module 'next-auth' {
       id: string
       role: string
       isExternal: boolean
+      employeeId?: string
     } & DefaultSession['user']
   }
 
   interface User {
     role: string
     isExternal: boolean
+    employeeId?: string
   }
 }
 
@@ -19,5 +21,6 @@ declare module 'next-auth/jwt' {
   interface JWT {
     role: string
     isExternal: boolean
+    employeeId?: string
   }
 }

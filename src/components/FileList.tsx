@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useSession } from 'next-auth/react'
 import { 
   DocumentIcon, 
@@ -38,9 +38,11 @@ interface FileListProps {
   parentId?: string | null
   onFolderClick?: (folderId: string) => void
   refreshTrigger?: number
+  searchTerm?: string
+  fileTypeFilter?: string
 }
 
-export default function FileList({ parentId, onFolderClick, refreshTrigger }: FileListProps) {
+export default function FileList({ parentId, onFolderClick, refreshTrigger, searchTerm = '', fileTypeFilter = 'all' }: FileListProps) {
   const { data: session } = useSession()
   const [files, setFiles] = useState<FileItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -49,29 +51,6 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger }: Fi
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
   
   const isAdmin = session?.user?.role === 'SUPER_ADMIN' || session?.user?.role === 'ADMIN'
-
-  useEffect(() => {
-    const fetchFiles = async () => {
-      try {
-        setLoading(true)
-        const url = parentId 
-          ? `/api/files?parentId=${parentId}`
-          : '/api/files'
-        
-        const response = await fetch(url)
-        if (response.ok) {
-          const data = await response.json()
-          setFiles(data.files || [])
-        }
-      } catch (error) {
-        console.error('Error fetching files:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchFiles()
-  }, [parentId, refreshTrigger])
 
   const formatFileSize = (bytes: number) => {
     if (bytes === 0) return '0 Bytes'
@@ -100,6 +79,294 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger }: Fi
       minute: '2-digit',
       hour12: false
     })
+  }
+
+  // Filter files based on search term and file type
+  const filteredFiles = useMemo(() => {
+    return files.filter(file => {
+      try {
+        // Search filter
+        const matchesSearch = !searchTerm || 
+          file.originalName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          file.mimeType.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          formatDate(file.createdAt).toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (searchTerm.startsWith('.') && file.originalName.toLowerCase().endsWith(searchTerm.toLowerCase()))
+
+        // File type filter
+        const matchesFileType = fileTypeFilter === 'all' || (() => {
+          if (file.isFolder) return fileTypeFilter === 'all'
+          
+          switch (fileTypeFilter) {
+            case 'documents':
+              return file.mimeType.includes('pdf') || 
+                     file.mimeType.includes('word') || 
+                     file.mimeType.includes('text') ||
+                     file.originalName.endsWith('.doc') ||
+                     file.originalName.endsWith('.docx') ||
+                     file.originalName.endsWith('.txt') ||
+                     file.originalName.endsWith('.rtf')
+            case 'images':
+              return file.mimeType.startsWith('image/')
+            case 'videos':
+              return file.mimeType.startsWith('video/')
+            case 'audio':
+              return file.mimeType.startsWith('audio/')
+            case 'archives':
+              return file.mimeType.includes('zip') || 
+                     file.mimeType.includes('rar') || 
+                     file.mimeType.includes('tar') ||
+                     file.originalName.endsWith('.zip') ||
+                     file.originalName.endsWith('.rar') ||
+                     file.originalName.endsWith('.7z')
+            case 'spreadsheets':
+              return file.mimeType.includes('spreadsheet') || 
+                     file.mimeType.includes('excel') ||
+                     file.originalName.endsWith('.xls') ||
+                     file.originalName.endsWith('.xlsx') ||
+                     file.originalName.endsWith('.csv')
+            case 'presentations':
+              return file.mimeType.includes('presentation') || 
+                     file.mimeType.includes('powerpoint') ||
+                     file.originalName.endsWith('.ppt') ||
+                     file.originalName.endsWith('.pptx')
+            default:
+              return true
+          }
+        })()
+
+        return matchesSearch && matchesFileType
+      } catch (error) {
+        console.error('Error filtering file:', error)
+        return true // Include file if there's an error to avoid breaking the UI
+      }
+    })
+  }, [files, searchTerm, fileTypeFilter])
+
+  useEffect(() => {
+    const fetchFiles = async () => {
+      try {
+        setLoading(true)
+        const url = parentId 
+          ? `/api/files?parentId=${parentId}`
+          : '/api/files'
+        
+        const response = await fetch(url)
+        if (response.ok) {
+          const data = await response.json()
+          setFiles(data.files || [])
+        }
+      } catch (error) {
+        console.error('Error fetching files:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchFiles()
+  }, [parentId, refreshTrigger])
+
+  const getListFileIcon = (file: FileItem) => {
+    if (file.isFolder) {
+      return (
+        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+          <FolderIcon className="h-5 w-5 text-white" />
+        </div>
+      )
+    }
+
+    // Get file extension
+    const extension = file.originalName.split('.').pop()?.toLowerCase() || ''
+    const mimeType = file.mimeType.toLowerCase()
+
+    // Document files
+    if (mimeType.includes('pdf') || extension === 'pdf') {
+      return (
+        <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
+          <span className="text-white font-bold text-xs">PDF</span>
+        </div>
+      )
+    }
+    
+    // Word documents
+    if (mimeType.includes('word') || ['doc', 'docx'].includes(extension)) {
+      return (
+        <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
+          <span className="text-white font-bold text-xs">DOC</span>
+        </div>
+      )
+    }
+
+    // Excel files
+    if (mimeType.includes('spreadsheet') || mimeType.includes('excel') || ['xls', 'xlsx', 'csv'].includes(extension)) {
+      return (
+        <div className="w-10 h-10 bg-gradient-to-br from-green-600 to-green-700 rounded-xl flex items-center justify-center shadow-lg">
+          <span className="text-white font-bold text-xs">XLS</span>
+        </div>
+      )
+    }
+
+    // PowerPoint files
+    if (mimeType.includes('presentation') || mimeType.includes('powerpoint') || ['ppt', 'pptx'].includes(extension)) {
+      return (
+        <div className="w-10 h-10 bg-gradient-to-br from-orange-600 to-orange-700 rounded-xl flex items-center justify-center shadow-lg">
+          <span className="text-white font-bold text-xs">PPT</span>
+        </div>
+      )
+    }
+
+    // Image files
+    if (mimeType.startsWith('image/')) {
+      return (
+        <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg">
+          <span className="text-white font-bold text-xs">IMG</span>
+        </div>
+      )
+    }
+
+    // Video files
+    if (mimeType.startsWith('video/')) {
+      return (
+        <div className="w-10 h-10 bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl flex items-center justify-center shadow-lg">
+          <span className="text-white font-bold text-xs">VID</span>
+        </div>
+      )
+    }
+
+    // Audio files
+    if (mimeType.startsWith('audio/')) {
+      return (
+        <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg">
+          <span className="text-white font-bold text-xs">AUD</span>
+        </div>
+      )
+    }
+
+    // Archive files
+    if (mimeType.includes('zip') || mimeType.includes('rar') || ['zip', 'rar', '7z', 'tar', 'gz'].includes(extension)) {
+      return (
+        <div className="w-10 h-10 bg-gradient-to-br from-yellow-600 to-yellow-700 rounded-xl flex items-center justify-center shadow-lg">
+          <span className="text-white font-bold text-xs">ZIP</span>
+        </div>
+      )
+    }
+
+    // Text files
+    if (mimeType.includes('text') || ['txt', 'rtf'].includes(extension)) {
+      return (
+        <div className="w-10 h-10 bg-gradient-to-br from-gray-600 to-gray-700 rounded-xl flex items-center justify-center shadow-lg">
+          <span className="text-white font-bold text-xs">TXT</span>
+        </div>
+      )
+    }
+
+    // Default for unknown file types
+    return (
+      <div className="w-10 h-10 bg-gradient-to-br from-gray-400 to-gray-500 rounded-xl flex items-center justify-center shadow-lg">
+        <DocumentIcon className="h-5 w-5 text-white" />
+      </div>
+    )
+  }
+
+  const getFileIcon = (file: FileItem) => {
+    if (file.isFolder) {
+      return (
+        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
+          <FolderIcon className="h-6 w-6 text-white" />
+        </div>
+      )
+    }
+
+    // Get file extension
+    const extension = file.originalName.split('.').pop()?.toLowerCase() || ''
+    const mimeType = file.mimeType.toLowerCase()
+
+    // Document files
+    if (mimeType.includes('pdf') || extension === 'pdf') {
+      return (
+        <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center shadow-lg">
+          <span className="text-white font-bold text-xs">PDF</span>
+        </div>
+      )
+    }
+    
+    // Word documents
+    if (mimeType.includes('word') || ['doc', 'docx'].includes(extension)) {
+      return (
+        <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
+          <span className="text-white font-bold text-xs">DOC</span>
+        </div>
+      )
+    }
+
+    // Excel files
+    if (mimeType.includes('spreadsheet') || mimeType.includes('excel') || ['xls', 'xlsx', 'csv'].includes(extension)) {
+      return (
+        <div className="w-12 h-12 bg-gradient-to-br from-green-600 to-green-700 rounded-xl flex items-center justify-center shadow-lg">
+          <span className="text-white font-bold text-xs">XLS</span>
+        </div>
+      )
+    }
+
+    // PowerPoint files
+    if (mimeType.includes('presentation') || mimeType.includes('powerpoint') || ['ppt', 'pptx'].includes(extension)) {
+      return (
+        <div className="w-12 h-12 bg-gradient-to-br from-orange-600 to-orange-700 rounded-xl flex items-center justify-center shadow-lg">
+          <span className="text-white font-bold text-xs">PPT</span>
+        </div>
+      )
+    }
+
+    // Image files
+    if (mimeType.startsWith('image/')) {
+      return (
+        <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-pink-600 rounded-xl flex items-center justify-center shadow-lg">
+          <span className="text-white font-bold text-xs">IMG</span>
+        </div>
+      )
+    }
+
+    // Video files
+    if (mimeType.startsWith('video/')) {
+      return (
+        <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl flex items-center justify-center shadow-lg">
+          <span className="text-white font-bold text-xs">VID</span>
+        </div>
+      )
+    }
+
+    // Audio files
+    if (mimeType.startsWith('audio/')) {
+      return (
+        <div className="w-12 h-12 bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg">
+          <span className="text-white font-bold text-xs">AUD</span>
+        </div>
+      )
+    }
+
+    // Archive files
+    if (mimeType.includes('zip') || mimeType.includes('rar') || ['zip', 'rar', '7z', 'tar', 'gz'].includes(extension)) {
+      return (
+        <div className="w-12 h-12 bg-gradient-to-br from-yellow-600 to-yellow-700 rounded-xl flex items-center justify-center shadow-lg">
+          <span className="text-white font-bold text-xs">ZIP</span>
+        </div>
+      )
+    }
+
+    // Text files
+    if (mimeType.includes('text') || ['txt', 'rtf'].includes(extension)) {
+      return (
+        <div className="w-12 h-12 bg-gradient-to-br from-gray-600 to-gray-700 rounded-xl flex items-center justify-center shadow-lg">
+          <span className="text-white font-bold text-xs">TXT</span>
+        </div>
+      )
+    }
+
+    // Default for unknown file types
+    return (
+      <div className="w-12 h-12 bg-gradient-to-br from-gray-400 to-gray-500 rounded-xl flex items-center justify-center shadow-lg">
+        <DocumentIcon className="h-6 w-6 text-white" />
+      </div>
+    )
   }
 
   const handleView = (fileId: string) => {
@@ -175,34 +442,32 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger }: Fi
     )
   }
 
-  if (files.length === 0) {
+  if (filteredFiles.length === 0 && !loading) {
     return (
       <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-12 text-center">
         <div className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-6">
           <FolderIcon className="h-10 w-10 text-gray-400" />
         </div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">No files or folders yet</h3>
-        <p className="text-gray-500">Upload some files to get started</p>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          {searchTerm || fileTypeFilter !== 'all' ? 'No matching files found' : 'No files or folders yet'}
+        </h3>
+        <p className="text-gray-500">
+          {searchTerm || fileTypeFilter !== 'all' 
+            ? 'Try adjusting your search or filter criteria' 
+            : 'Upload some files to get started'}
+        </p>
       </div>
     )
   }
 
   const GridView = () => (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 p-6">
-      {files.map((file) => (
+      {filteredFiles.map((file) => (
         <div key={file.id} className="bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-200 p-4 group">
           <div className="flex flex-col items-center text-center">
             {/* File Icon */}
             <div className="w-12 h-12 mb-3 flex items-center justify-center">
-              {file.isFolder ? (
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                  <FolderIcon className="h-6 w-6 text-white" />
-                </div>
-              ) : (
-                <div className="w-12 h-12 bg-gradient-to-br from-gray-400 to-gray-500 rounded-xl flex items-center justify-center shadow-lg">
-                  <DocumentIcon className="h-6 w-6 text-white" />
-                </div>
-              )}
+              {getFileIcon(file)}
             </div>
             
             {/* File Name */}
@@ -315,19 +580,11 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger }: Fi
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {files.map((file) => (
+          {filteredFiles.map((file) => (
             <tr key={file.id} className="hover:bg-gray-50 transition-colors duration-200">
               <td className="px-8 py-6 whitespace-nowrap">
                 <div className="flex items-center space-x-4">
-                  {file.isFolder ? (
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg">
-                      <FolderIcon className="h-5 w-5 text-white" />
-                    </div>
-                  ) : (
-                    <div className="w-10 h-10 bg-gradient-to-br from-gray-400 to-gray-500 rounded-xl flex items-center justify-center shadow-lg">
-                      <DocumentIcon className="h-5 w-5 text-white" />
-                    </div>
-                  )}
+                  {getListFileIcon(file)}
                   <div className="min-w-0 flex-1">
                     <button
                       onClick={(e) => {
@@ -366,17 +623,19 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger }: Fi
                 <td className="px-8 py-6 whitespace-nowrap text-sm text-gray-500">
                   {file.uploadPath && file.weekNumber ? (
                     <div className="flex items-center space-x-2">
-                      <div className="flex items-center space-x-1 bg-blue-50 px-2 py-1 rounded-lg">
-                        <UserIcon className="h-3 w-3 text-blue-600" />
-                        <span className="text-xs font-medium text-blue-700">{file.owner.employeeId || file.owner.id}</span>
+                      <div className="flex items-center space-x-1 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-200">
+                        <UserIcon className="h-4 w-4 text-blue-600" />
+                        <span className="text-sm font-semibold text-blue-700">
+                          {file.owner.employeeId ? `EMP: ${file.owner.employeeId}` : `ID: ${file.owner.id.substring(0, 8)}`}
+                        </span>
                       </div>
-                      <div className="flex items-center space-x-1 bg-green-50 px-2 py-1 rounded-lg">
-                        <CalendarIcon className="h-3 w-3 text-green-600" />
-                        <span className="text-xs font-medium text-green-700">Week {file.weekNumber}</span>
+                      <div className="flex items-center space-x-1 bg-green-50 px-3 py-1.5 rounded-lg border border-green-200">
+                        <CalendarIcon className="h-4 w-4 text-green-600" />
+                        <span className="text-sm font-semibold text-green-700">Week {file.weekNumber}</span>
                       </div>
                     </div>
                   ) : (
-                    <span className="text-xs text-gray-400 bg-gray-50 px-2 py-1 rounded-lg">Legacy Path</span>
+                    <span className="text-sm text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-200 font-medium">Legacy Structure</span>
                   )}
                 </td>
               )}
@@ -500,7 +759,10 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger }: Fi
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-xl font-bold text-gray-900">Files & Folders</h3>
-              <p className="text-sm text-gray-600 mt-1">Organize and share your documents</p>
+              <p className="text-sm text-gray-600 mt-1">
+                {filteredFiles.length} of {files.length} items
+                {(searchTerm || fileTypeFilter !== 'all') && ' (filtered)'}
+              </p>
             </div>
             <div className="flex bg-white rounded-xl shadow-sm border border-gray-200 p-1">
               <button
