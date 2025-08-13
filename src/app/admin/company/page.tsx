@@ -124,7 +124,15 @@ export default function CompanySettingsPage() {
         const data = await response.json();
         setSettings(data.settings);
         setMessage({ type: 'success', text: 'Company settings updated successfully!' });
-        // Refresh the page to apply new styles
+        
+        // Trigger favicon update
+        localStorage.setItem('companySettingsUpdated', Date.now().toString());
+        window.dispatchEvent(new StorageEvent('storage', {
+          key: 'companySettingsUpdated',
+          newValue: Date.now().toString()
+        }));
+        
+        // Refresh the page to apply new styles and metadata
         setTimeout(() => window.location.reload(), 1000);
       } else {
         setMessage({ type: 'error', text: 'Failed to update settings' });
