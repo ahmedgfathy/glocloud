@@ -141,7 +141,7 @@ export default function Sidebar() {
         </div>
       )}
       
-      <div className="flex-1 flex flex-col py-6 min-h-0">
+      <div className="flex-1 flex flex-col py-6 min-h-0 overflow-hidden">
         <nav className="flex-1 px-6 space-y-1 overflow-y-auto">
           {/* Main Navigation */}
           <div className="space-y-1">
@@ -195,9 +195,9 @@ export default function Sidebar() {
           )}
         </nav>
 
-        {/* Sign Out Button and Footer - Always at bottom */}
-        <div className="flex-shrink-0 mt-auto">
-          <div className="px-6 py-4 border-t border-gray-200">
+        {/* Sign Out Button and Footer - Sticky at bottom */}
+        <div className="flex-shrink-0 px-6 py-4 mt-auto">
+          <div className="border-t border-gray-200 pt-4">
             <button
               onClick={async () => {
                 try {
@@ -213,7 +213,7 @@ export default function Sidebar() {
               Sign Out
             </button>
             
-            {/* Footer in Sidebar - Always at bottom */}
+            {/* Footer - Stuck at bottom */}
             <div className="pt-4 border-t border-gray-200">
               <div className="flex items-center justify-between text-xs text-gray-500">
                 <span>© 2025 {companySettings.companyName}</span>
