@@ -21,7 +21,7 @@ interface OrganizedFile {
   id: string;
   name: string;
   originalName: string;
-  size: number;
+  size: number; 
   mimeType: string;
   createdAt: string;
   weekNumber: number;

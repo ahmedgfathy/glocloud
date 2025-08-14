@@ -2,19 +2,49 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { CloudIcon } from '@heroicons/react/24/outline'
+
+interface CompanySettings {
+  companyName: string;
+  companyLogo: string | null;
+}
 
 export default function Home() {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const [companySettings, setCompanySettings] = useState<CompanySettings>({
+    companyName: 'PMS Cloud',
+    companyLogo: null
+  })
 
   useEffect(() => {
     if (session) {
       router.push('/dashboard')
     }
   }, [session, router])
+
+  useEffect(() => {
+    // Fetch company settings for display
+    const fetchCompanySettings = async () => {
+      try {
+        const response = await fetch('/api/company')
+        if (response.ok) {
+          const data = await response.json()
+          setCompanySettings({
+            companyName: data.settings.companyName,
+            companyLogo: data.settings.companyLogo
+          })
+        }
+      } catch (error) {
+        console.error('Error fetching company settings:', error)
+      }
+    }
+
+    fetchCompanySettings()
+  }, [])
 
   if (status === 'loading') {
     return (
@@ -29,10 +59,26 @@ export default function Home() {
       <div className="container mx-auto px-4 py-16">
         <div className="text-center">
           <div className="flex justify-center mb-6">
-            <CloudIcon className="h-16 w-16 text-blue-600" />
+            {companySettings.companyLogo ? (
+              <Image
+                src={companySettings.companyLogo}
+                alt={`${companySettings.companyName} Logo`}
+                width={64}
+                height={64}
+                className="w-16 h-16 object-contain"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none'
+                  const fallbackIcon = e.currentTarget.nextElementSibling as HTMLElement
+                  if (fallbackIcon) {
+                    fallbackIcon.classList.remove('hidden')
+                  }
+                }}
+              />
+            ) : null}
+            <CloudIcon className={`h-16 w-16 text-blue-600 ${companySettings.companyLogo ? 'hidden' : ''}`} />
           </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-6">
-            Welcome to PMS Cloud
+            Welcome to {companySettings.companyName}
           </h1>
           <p className="text-xl text-gray-600 mb-8">
             Secure cloud storage and file sharing for your business

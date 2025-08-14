@@ -35,7 +35,7 @@ export default function Sidebar() {
     // Fetch company settings for display
     const fetchCompanySettings = async () => {
       try {
-        const response = await fetch('/api/admin/company')
+        const response = await fetch('/api/company')
         if (response.ok) {
           const data = await response.json()
           setCompanySettings({
