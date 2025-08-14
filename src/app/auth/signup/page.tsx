@@ -1,9 +1,15 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { CloudIcon } from '@heroicons/react/24/outline'
+
+interface CompanySettings {
+  companyName: string;
+  companyLogo: string | null;
+}
 
 export default function SignUp() {
   const [name, setName] = useState('')
@@ -14,6 +20,30 @@ export default function SignUp() {
   const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const [companySettings, setCompanySettings] = useState<CompanySettings>({
+    companyName: 'PMS Cloud',
+    companyLogo: null
+  })
+
+  useEffect(() => {
+    // Fetch company settings for display
+    const fetchCompanySettings = async () => {
+      try {
+        const response = await fetch('/api/company')
+        if (response.ok) {
+          const data = await response.json()
+          setCompanySettings({
+            companyName: data.settings.companyName,
+            companyLogo: data.settings.companyLogo
+          })
+        }
+      } catch (error) {
+        console.error('Error fetching company settings:', error)
+      }
+    }
+
+    fetchCompanySettings()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -63,10 +93,26 @@ export default function SignUp() {
       <div className="max-w-md w-full space-y-8">
         <div>
           <div className="flex justify-center">
-            <CloudIcon className="h-12 w-12 text-blue-600" />
+            {companySettings.companyLogo ? (
+              <Image
+                src={companySettings.companyLogo}
+                alt={`${companySettings.companyName} Logo`}
+                width={48}
+                height={48}
+                className="w-12 h-12 object-contain"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none'
+                  const fallbackIcon = e.currentTarget.nextElementSibling as HTMLElement
+                  if (fallbackIcon) {
+                    fallbackIcon.classList.remove('hidden')
+                  }
+                }}
+              />
+            ) : null}
+            <CloudIcon className={`h-12 w-12 text-blue-600 ${companySettings.companyLogo ? 'hidden' : ''}`} />
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Create your account
+            Join {companySettings.companyName}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             Or{' '}

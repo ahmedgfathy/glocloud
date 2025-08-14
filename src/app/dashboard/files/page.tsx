@@ -1,9 +1,9 @@
 'use client'
-
 import { useSession } from 'next-auth/react'
 import { redirect } from 'next/navigation'
 import { useState, useMemo } from 'react'
 import FileList from '@/components/FileList'
+import FileUpload from '@/components/FileUpload'
 import Sidebar from '@/components/Sidebar'
 import { 
   FolderIcon, 
@@ -42,9 +42,14 @@ export default function FilesPage() {
 
   const handleBackClick = () => {
     if (breadcrumb.length > 0) {
+      // Go back one level in breadcrumb
       const newBreadcrumb = breadcrumb.slice(0, -1)
       setBreadcrumb(newBreadcrumb)
       setCurrentFolder(newBreadcrumb.length > 0 ? newBreadcrumb[newBreadcrumb.length - 1].id : null)
+    } else if (currentFolder) {
+      // If no breadcrumb but we're in a folder, go back to root
+      setCurrentFolder(null)
+      setBreadcrumb([])
     }
   }
 
@@ -65,90 +70,24 @@ export default function FilesPage() {
       <main className="flex-1 ml-64 flex flex-col h-screen">
         <div className="flex-1 overflow-y-auto content-scrollable p-8">
           <div className="max-w-6xl mx-auto">
-            {/* Header */}
-            <div className="mb-8">
-              <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h1 className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-                      My Files
-                    </h1>
-                    <p className="text-gray-600 mt-1">Browse and manage your documents</p>
-                  </div>
-                  
-                  {currentFolder && (
-                    <button
-                      onClick={handleBackClick}
-                      className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-xl hover:from-gray-700 hover:to-gray-800 transition-all duration-200 transform hover:scale-105 shadow-lg"
-                    >
-                      <ArrowLeftIcon className="h-5 w-5" />
-                      <span>Back</span>
-                    </button>
-                  )}
-                </div>
-                
-                {/* Breadcrumb - Only show when in subfolder */}
-                {currentFolder && (
-                  <div className="flex items-center space-x-2 text-sm text-gray-600 bg-gray-50 rounded-xl p-4 border mb-6">
-                    <FolderIcon className="h-5 w-5 text-blue-600" />
-                    <span 
-                      className="cursor-pointer hover:text-blue-600 transition-colors px-3 py-2 rounded-lg hover:bg-white font-medium"
-                      onClick={() => {
-                        setCurrentFolder(null)
-                        setBreadcrumb([])
-                      }}
-                    >
-                      Root
-                    </span>
-                    {breadcrumb.map((folder, index) => (
-                      <div key={folder.id} className="flex items-center space-x-2">
-                        <span className="text-gray-400">/</span>
-                        <span 
-                          className={`cursor-pointer hover:text-blue-600 transition-colors px-3 py-2 rounded-lg hover:bg-white font-medium ${index === breadcrumb.length - 1 ? 'font-bold text-blue-600 bg-white shadow-sm' : ''}`}
-                          onClick={() => {
-                            const newBreadcrumb = breadcrumb.slice(0, index + 1)
-                            setBreadcrumb(newBreadcrumb)
-                            setCurrentFolder(folder.id)
-                          }}
-                        >
-                          {folder.name}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Search and Filter Controls */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Search Bar */}
-                  <div className="relative">
-                    <MagnifyingGlassIcon className="h-5 w-5 absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="Search files by name, date, or extension (.docx, .pdf, etc.)"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm text-sm"
-                    />
-                  </div>
-
-                  {/* File Type Filter */}
-                  <div className="relative">
-                    <FunnelIcon className="h-5 w-5 absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <select
-                      value={fileTypeFilter}
-                      onChange={(e) => setFileTypeFilter(e.target.value)}
-                      className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm text-sm appearance-none bg-white"
-                    >
-                      {fileTypeOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.icon} {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </div>
+            {/* Simple Header */}
+            <div className="mb-6">
+              <h1 className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
+                My Files
+              </h1>
+              {currentFolder && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault()
+                    console.log('Back button clicked, currentFolder:', currentFolder, 'breadcrumb:', breadcrumb)
+                    handleBackClick()
+                  }}
+                  className="mt-4 flex items-center space-x-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors cursor-pointer"
+                >
+                  <ArrowLeftIcon className="h-4 w-4" />
+                  <span>Back</span>
+                </button>
+              )}
             </div>
 
             {/* Files List */}
@@ -159,8 +98,7 @@ export default function FilesPage() {
                   {currentFolder ? 'Folder Contents' : 'All Files'}
                 </h2>
                 <p className="text-blue-100 mt-1">
-                  {searchTerm ? `Search results for "${searchTerm}"` : 
-                   currentFolder ? 'Files and folders in current directory' : 'All your files and folders'}
+                  {currentFolder ? 'Files and folders in current directory' : 'All your files and folders'}
                 </p>
               </div>
               <div className="overflow-y-auto content-scrollable">
