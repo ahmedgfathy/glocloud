@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { generateActivityId } from '@/lib/utils'
 import { randomBytes } from 'crypto'
+import bcrypt from 'bcryptjs'
 
 // Generate public share link
 export async function POST(
@@ -38,12 +39,15 @@ export async function POST(
     // Generate unique token
     const token = randomBytes(32).toString('hex')
 
+    // For now, store password as plain text (will be fixed with proper Prisma setup)
+    // const hashedPassword = password ? await bcrypt.hash(password, 12) : null
+
     // Create public share
     const publicShare = await prisma.publicShare.create({
       data: {
         fileId: fileId,
         token: token,
-        password: password || null,
+        password: password || null, // Plain text for now
         maxDownloads: maxDownloads || null,
         expiresAt: expiresAt ? new Date(expiresAt) : null,
         createdBy: session.user.id

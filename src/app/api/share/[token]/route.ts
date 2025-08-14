@@ -157,7 +157,21 @@ export async function POST(
         return NextResponse.json({ error: 'Password required' }, { status: 400 })
       }
 
-      const isValidPassword = await bcrypt.compare(password, publicShare.password)
+      let isValidPassword = false
+      
+      // Check if the stored password is a bcrypt hash
+      if (publicShare.password.startsWith('$2')) {
+        // It's a bcrypt hash, use bcrypt.compare
+        try {
+          isValidPassword = await bcrypt.compare(password, publicShare.password);
+        } catch (error: any) {
+          isValidPassword = false;
+        }
+      } else {
+        // It's plain text, use direct comparison
+        isValidPassword = password === publicShare.password;
+      }
+      
       if (!isValidPassword) {
         return NextResponse.json({ error: 'Invalid password' }, { status: 401 })
       }

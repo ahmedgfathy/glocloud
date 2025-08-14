@@ -187,7 +187,7 @@ export default function ShareModal({ isOpen, onClose, fileId, fileName }: ShareM
 
   return (
     <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-      <div className="relative top-20 mx-auto p-5 border w-[500px] shadow-lg rounded-md bg-white">
+      <div className="relative top-20 mx-auto p-5 border w-[600px] shadow-lg rounded-md bg-white">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-medium text-gray-900">Share File</h3>
           <button
@@ -354,34 +354,34 @@ export default function ShareModal({ isOpen, onClose, fileId, fileName }: ShareM
                 <div className="space-y-2">
                   {publicShares.map((share) => (
                     <div key={share.id} className="flex items-center justify-between bg-gray-50 p-3 rounded-md">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2">
-                          <code className="text-xs bg-gray-200 px-2 py-1 rounded">
-                            {share.shareUrl.substring(0, 50)}...
-                          </code>
+                      <div className="flex-1 pr-4">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <div className="flex-1 bg-white border rounded px-3 py-2 font-mono text-sm break-all">
+                            {share.shareUrl}
+                          </div>
                           {share.hasPassword && (
-                            <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-                              Protected
+                            <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded flex-shrink-0">
+                              🔒 Protected
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-gray-500 mt-1">
+                        <p className="text-xs text-gray-500">
                           Downloads: {share.downloads}
                           {share.maxDownloads && ` / ${share.maxDownloads}`}
                           {share.expiresAt && ` • Expires: ${new Date(share.expiresAt).toLocaleDateString()}`}
                         </p>
                       </div>
-                      <div className="flex space-x-1">
+                      <div className="flex flex-col space-y-1 flex-shrink-0">
                         <button
                           onClick={() => handleCopyLink(share.shareUrl)}
-                          className="p-1 text-blue-600 hover:bg-blue-100 rounded"
+                          className="p-2 text-blue-600 hover:bg-blue-100 rounded text-xs"
                           title="Copy link"
                         >
                           <ClipboardIcon className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => handleDeletePublicShare(share.id)}
-                          className="p-1 text-red-600 hover:bg-red-100 rounded"
+                          className="p-2 text-red-600 hover:bg-red-100 rounded text-xs"
                           title="Delete link"
                         >
                           <XMarkIcon className="h-4 w-4" />
