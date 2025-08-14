@@ -34,6 +34,7 @@ model User {
   // Relations
   ownedFiles     File[]        @relation("FileOwner")
   sharedFiles    FileShare[]
+  publicShares   PublicShare[]
   activities     Activity[]
   notifications  Notification[]
   invitedBy      User?         @relation("UserInvites", fields: [invitedById], references: [id])
@@ -62,6 +63,7 @@ model File {
   parent       File?        @relation("FileHierarchy", fields: [parentId], references: [id])
   children     File[]       @relation("FileHierarchy")
   shares       FileShare[]
+  publicShares PublicShare[]
   activities   Activity[]
 
   @@map("files")
@@ -134,6 +136,26 @@ model CompanySettings {
   @@map("company_settings")
 }
 
+model PublicShare {
+  id          String    @id @default(cuid())
+  fileId      String
+  token       String    @unique
+  password    String?
+  downloads   Int       @default(0)
+  maxDownloads Int?
+  expiresAt   DateTime?
+  isActive    Boolean   @default(true)
+  createdBy   String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  file        File      @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  creator     User      @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+
+  @@map("public_shares")
+}
+
 enum UserRole {
   SUPER_ADMIN
   ADMIN
@@ -142,6 +164,7 @@ enum UserRole {
 
 enum FilePermission {
   VIEW
+  DOWNLOAD
   EDIT
   FULL_ACCESS
 }
@@ -153,6 +176,8 @@ enum ActivityType {
   FILE_DOWNLOAD
   FILE_DELETE
   FILE_SHARE
+  FILE_PUBLIC_SHARE
+  FILE_PUBLIC_UNSHARE
   FILE_EDIT
   FILE_VIEW
   FOLDER_CREATE
