@@ -5,7 +5,6 @@ import { redirect } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import FileUpload from '@/components/FileUpload'
 import Sidebar from '@/components/Sidebar'
-import Footer from '@/components/Footer'
 import Link from 'next/link'
 import { 
   FolderIcon, 
@@ -16,13 +15,27 @@ import {
   DocumentIcon,
   ArrowDownTrayIcon,
   TrashIcon,
-  EyeIcon
+  EyeIcon,
+  ChartPieIcon
 } from '@heroicons/react/24/outline'
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'
+import { Pie } from 'react-chartjs-2'
+
+ChartJS.register(ArcElement, Tooltip, Legend)
 
 interface UserStats {
   totalFiles: number
   storageUsed: number
   sharedFiles: number
+}
+
+interface FileTypeStats {
+  documents: number
+  images: number
+  videos: number
+  audio: number
+  archives: number
+  misc: number
 }
 
 interface Activity {
@@ -43,6 +56,14 @@ export default function Dashboard() {
     totalFiles: 0,
     storageUsed: 0,
     sharedFiles: 0
+  })
+  const [fileTypeStats, setFileTypeStats] = useState<FileTypeStats>({
+    documents: 0,
+    images: 0,
+    videos: 0,
+    audio: 0,
+    archives: 0,
+    misc: 0
   })
   const [activities, setActivities] = useState<Activity[]>([])
   const [statsLoading, setStatsLoading] = useState(true)
@@ -66,11 +87,41 @@ export default function Dashboard() {
         const storageUsed = files.reduce((total: number, file: any) => total + (file.size || 0), 0)
         const sharedFiles = 0
         
+        // Calculate file type statistics
+        const fileTypeStats = {
+          documents: 0,
+          images: 0,
+          videos: 0,
+          audio: 0,
+          archives: 0,
+          misc: 0
+        }
+
+        files.forEach((file: any) => {
+          const extension = file.originalName?.split('.').pop()?.toLowerCase() || ''
+          
+          if (['pdf', 'doc', 'docx', 'txt', 'rtf', 'odt'].includes(extension)) {
+            fileTypeStats.documents++
+          } else if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'svg', 'webp'].includes(extension)) {
+            fileTypeStats.images++
+          } else if (['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv', 'webm'].includes(extension)) {
+            fileTypeStats.videos++
+          } else if (['mp3', 'wav', 'aac', 'flac', 'ogg', 'm4a'].includes(extension)) {
+            fileTypeStats.audio++
+          } else if (['zip', 'rar', '7z', 'tar', 'gz', 'bz2'].includes(extension)) {
+            fileTypeStats.archives++
+          } else {
+            fileTypeStats.misc++
+          }
+        })
+        
         setUserStats({
           totalFiles,
           storageUsed,
           sharedFiles
         })
+        
+        setFileTypeStats(fileTypeStats)
       }
     } catch (error) {
       console.error('Error fetching user stats:', error)
@@ -120,13 +171,75 @@ export default function Dashboard() {
     fetchActivities()
   }
 
+  // Chart data for file type statistics
+  const chartData = {
+    labels: ['Documents', 'Images', 'Videos', 'Audio', 'Archives', 'Misc'],
+    datasets: [
+      {
+        data: [
+          fileTypeStats.documents,
+          fileTypeStats.images,
+          fileTypeStats.videos,
+          fileTypeStats.audio,
+          fileTypeStats.archives,
+          fileTypeStats.misc
+        ],
+        backgroundColor: [
+          '#3B82F6', // Blue for documents
+          '#10B981', // Green for images
+          '#F59E0B', // Yellow for videos
+          '#EF4444', // Red for audio
+          '#8B5CF6', // Purple for archives
+          '#6B7280'  // Gray for misc
+        ],
+        borderColor: [
+          '#2563EB',
+          '#059669',
+          '#D97706',
+          '#DC2626',
+          '#7C3AED',
+          '#4B5563'
+        ],
+        borderWidth: 2
+      }
+    ]
+  }
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'bottom' as const,
+        labels: {
+          padding: 20,
+          usePointStyle: true,
+          font: {
+            size: 12
+          }
+        }
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context: any) {
+            const label = context.label || ''
+            const value = context.parsed
+            const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0)
+            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : '0'
+            return `${label}: ${value} files (${percentage}%)`
+          }
+        }
+      }
+    }
+  }
+
   return (
     <div className="h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex">
       <Sidebar />
       <main className="flex-1 ml-64 flex flex-col h-screen">
         <div className="flex-1 overflow-y-auto content-scrollable p-8">
           <div className="max-w-7xl mx-auto">
-            <div className="mb-8">
+            <div className="mb-6">
               <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
                 <div className="flex items-center space-x-4 mb-4">
                   <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
@@ -144,7 +257,7 @@ export default function Dashboard() {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                   <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
                     <div className="flex items-center justify-between">
                       <div>
@@ -190,8 +303,10 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="lg:col-span-1">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Left Column */}
+              <div className="lg:col-span-1 space-y-6">
+                {/* Upload Files Card */}
                 <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
                   <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6">
                     <h2 className="text-xl font-bold text-white flex items-center">
@@ -207,10 +322,33 @@ export default function Dashboard() {
                     />
                   </div>
                 </div>
+
+                {/* File Type Statistics Card */}
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+                  <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-6">
+                    <h2 className="text-xl font-bold text-white flex items-center">
+                      <ChartPieIcon className="h-6 w-6 mr-3" />
+                      File Types Statistics
+                    </h2>
+                    <p className="text-indigo-100 mt-1">Your uploaded file distribution</p>
+                  </div>
+                  <div className="p-6">
+                    {statsLoading ? (
+                      <div className="flex items-center justify-center h-64">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+                      </div>
+                    ) : (
+                      <div className="h-64">
+                        <Pie data={chartData} options={chartOptions} />
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
 
-              {/* Quick Actions */}
-              <div className="lg:col-span-1">
+              {/* Right Column */}
+              <div className="lg:col-span-1 space-y-6">
+                {/* Quick Actions Card */}
                 <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
                   <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-6">
                     <h2 className="text-xl font-bold text-white flex items-center">
@@ -243,108 +381,104 @@ export default function Dashboard() {
                     </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="lg:col-span-1 space-y-6">
-                <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                    <div className="w-6 h-6 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg mr-3"></div>
-                    Storage Info
-                  </h3>
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600 font-medium">Used</span>
-                      <span className="font-bold text-gray-900">
-                        {statsLoading ? '...' : formatFileSize(userStats.storageUsed)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-600 font-medium">Available</span>
-                      <span className="font-bold text-green-600">Unlimited</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                      <div className="bg-gradient-to-r from-blue-500 to-purple-500 h-3 rounded-full transition-all duration-500" style={{width: '5%'}}></div>
-                    </div>
-                    <p className="text-xs text-gray-500 text-center">
-                      {userStats.totalFiles} files stored
-                    </p>
+                {/* Storage Info Card */}
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+                  <div className="bg-gradient-to-r from-cyan-600 to-blue-600 p-6">
+                    <h2 className="text-xl font-bold text-white flex items-center">
+                      <CloudIcon className="h-6 w-6 mr-3" />
+                      Storage Info
+                    </h2>
+                    <p className="text-cyan-100 mt-1">Your storage usage overview</p>
+                  </div>
+                  <div className="p-6">
+                    {statsLoading ? (
+                      <div className="animate-pulse">
+                        <div className="h-4 bg-gray-200 rounded mb-4"></div>
+                        <div className="h-4 bg-gray-200 rounded mb-4"></div>
+                        <div className="h-4 bg-gray-200 rounded"></div>
+                      </div>
+                    ) : (
+                      <div className="space-y-6">
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-600">Total Files</span>
+                          <span className="text-2xl font-bold text-blue-600">{userStats.totalFiles}</span>
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-600">Storage Used</span>
+                          <span className="text-2xl font-bold text-green-600">{formatFileSize(userStats.storageUsed)}</span>
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <span className="text-gray-600">Shared Files</span>
+                          <span className="text-2xl font-bold text-purple-600">{userStats.sharedFiles}</span>
+                        </div>
+                        
+                        <div className="bg-gray-100 rounded-lg p-4 mt-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm text-gray-600">Storage Usage</span>
+                            <span className="text-sm text-gray-600">
+                              {formatFileSize(userStats.storageUsed)} / 10 GB
+                            </span>
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div 
+                              className="bg-gradient-to-r from-blue-500 to-cyan-500 h-2 rounded-full"
+                              style={{ 
+                                width: `${Math.min((userStats.storageUsed / (10 * 1024 * 1024 * 1024)) * 100, 100)}%` 
+                              }}
+                            ></div>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-2">
+                            {((userStats.storageUsed / (10 * 1024 * 1024 * 1024)) * 100).toFixed(1)}% of your storage is used
+                          </p>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                    <div className="w-6 h-6 bg-gradient-to-br from-green-500 to-blue-500 rounded-lg mr-3 flex items-center justify-center">
-                      <ClockIcon className="h-3 w-3 text-white" />
-                    </div>
-                    Recent Activity
-                  </h3>
-                  <div className="space-y-3 max-h-80 overflow-y-auto content-scrollable">
+                {/* Recent Activity Card */}
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+                  <div className="bg-gradient-to-r from-orange-600 to-red-600 p-6">
+                    <h2 className="text-xl font-bold text-white flex items-center">
+                      <ClockIcon className="h-6 w-6 mr-3" />
+                      Recent Activity
+                    </h2>
+                    <p className="text-orange-100 mt-1">Your latest file operations</p>
+                  </div>
+                  <div className="p-6">
                     {activitiesLoading ? (
-                      <div className="text-center py-4">
-                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mx-auto"></div>
+                      <div className="flex items-center justify-center h-32">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
                       </div>
                     ) : activities.length > 0 ? (
-                      activities.slice(0, 10).map((activity) => (
-                        <div key={activity.id} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
-                          <div className="flex-shrink-0">
-                            {activity.action === 'FILE_UPLOAD' && (
-                              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                                <CloudArrowUpIcon className="h-4 w-4 text-green-600" />
-                              </div>
-                            )}
-                            {activity.action === 'FILE_DOWNLOAD' && (
-                              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                                <ArrowDownTrayIcon className="h-4 w-4 text-blue-600" />
-                              </div>
-                            )}
-                            {activity.action === 'FILE_VIEW' && (
-                              <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                                <EyeIcon className="h-4 w-4 text-purple-600" />
-                              </div>
-                            )}
-                            {activity.action === 'FILE_DELETE' && (
-                              <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                                <TrashIcon className="h-4 w-4 text-red-600" />
-                              </div>
-                            )}
-                            {activity.action === 'LOGIN' && (
-                              <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
-                                <div className="w-2 h-2 bg-indigo-600 rounded-full"></div>
-                              </div>
-                            )}
-                            {!['FILE_UPLOAD', 'FILE_DOWNLOAD', 'FILE_VIEW', 'FILE_DELETE', 'LOGIN'].includes(activity.action) && (
-                              <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                                <DocumentIcon className="h-4 w-4 text-gray-600" />
-                              </div>
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 truncate">
-                              {activity.details || activity.action.replace('_', ' ').toLowerCase()}
-                            </p>
-                            {activity.file && (
-                              <p className="text-xs text-gray-500 truncate">
-                                {activity.file.originalName || activity.file.name}
+                      <div className="space-y-3 max-h-48 overflow-y-auto">
+                        {activities.slice(0, 5).map((activity) => (
+                          <div key={activity.id} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                            <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                              {activity.action === 'upload' && <ArrowDownTrayIcon className="h-4 w-4 text-orange-600" />}
+                              {activity.action === 'download' && <ArrowDownTrayIcon className="h-4 w-4 text-green-600" />}
+                              {activity.action === 'delete' && <TrashIcon className="h-4 w-4 text-red-600" />}
+                              {activity.action === 'view' && <EyeIcon className="h-4 w-4 text-blue-600" />}
+                              {!['upload', 'download', 'delete', 'view'].includes(activity.action) && <DocumentIcon className="h-4 w-4 text-gray-600" />}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-gray-900 truncate">
+                                {activity.action.charAt(0).toUpperCase() + activity.action.slice(1)} {activity.file?.originalName || 'file'}
                               </p>
-                            )}
-                            <p className="text-xs text-gray-400">
-                              {new Date(activity.createdAt).toLocaleDateString('en-GB', { timeZone: 'Africa/Cairo' })} {new Date(activity.createdAt).toLocaleTimeString('en-GB', { 
-                                timeZone: 'Africa/Cairo',
-                                hour12: false,
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                            </p>
+                              <p className="text-xs text-gray-500">
+                                {new Date(activity.createdAt).toLocaleDateString()} at {new Date(activity.createdAt).toLocaleTimeString()}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      ))
+                        ))}
+                      </div>
                     ) : (
                       <div className="text-center py-8">
-                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                          <ClockIcon className="h-8 w-8 text-gray-400" />
-                        </div>
-                        <p className="text-gray-500 text-sm">No recent activity</p>
-                        <p className="text-gray-400 text-xs">Upload files to see activity here</p>
+                        <ClockIcon className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                        <p className="text-gray-500">No recent activity</p>
                       </div>
                     )}
                   </div>
@@ -354,8 +488,6 @@ export default function Dashboard() {
           </div>
         </div>
         
-        {/* Footer for content area only */}
-        <Footer />
       </main>
     </div>
   )

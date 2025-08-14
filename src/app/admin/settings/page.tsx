@@ -17,7 +17,6 @@ import {
   CheckCircleIcon
 } from '@heroicons/react/24/outline'
 import Sidebar from '@/components/Sidebar'
-import Footer from '@/components/Footer'
 
 interface CompanySettings {
   id: string;
@@ -649,8 +648,6 @@ export default function SettingsPage() {
           </div>
         </div>
         
-        {/* Footer for content area only */}
-        <Footer />
       </main>
     </div>
   )

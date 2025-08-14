@@ -4,13 +4,38 @@ import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 import { ChartBarIcon, UsersIcon, DocumentIcon, ShareIcon } from '@heroicons/react/24/outline'
 import Sidebar from '@/components/Sidebar'
-import Footer from '@/components/Footer'
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement,
+} from 'chart.js'
+import { Doughnut, Bar } from 'react-chartjs-2'
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+)
 
 interface AnalyticsData {
   totalUsers: number
   totalFiles: number
   totalShares: number
   storageUsed: number
+  fileTypeStats: Array<{
+    type: string
+    count: number
+    percentage: number
+  }>
   recentActivities: any[]
 }
 
@@ -49,7 +74,6 @@ export default function AnalyticsPage() {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
             </div>
           </div>
-          <Footer />
         </main>
       </div>
     )
@@ -68,7 +92,6 @@ export default function AnalyticsPage() {
               </div>
             </div>
           </div>
-          <Footer />
         </main>
       </div>
     )
@@ -172,6 +195,175 @@ export default function AnalyticsPage() {
               </div>
             </div>
 
+            {/* File Type Statistics */}
+            {analytics?.fileTypeStats && analytics.fileTypeStats.length > 0 && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                {/* Doughnut Chart */}
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
+                  <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                    <ChartBarIcon className="h-6 w-6 text-purple-600 mr-2" />
+                    File Types Distribution
+                  </h3>
+                  <div className="relative h-80">
+                    <Doughnut
+                      data={{
+                        labels: analytics.fileTypeStats.map(stat => stat.type),
+                        datasets: [
+                          {
+                            data: analytics.fileTypeStats.map(stat => stat.count),
+                            backgroundColor: [
+                              '#8B5CF6', // Documents - Purple
+                              '#10B981', // Excel - Green
+                              '#F59E0B', // Database - Yellow
+                              '#EF4444', // Images - Red
+                              '#3B82F6', // Videos - Blue
+                              '#EC4899', // Audio - Pink
+                              '#6B7280', // Archives - Gray
+                              '#84CC16', // Misc - Lime
+                            ],
+                            borderColor: [
+                              '#7C3AED',
+                              '#059669',
+                              '#D97706',
+                              '#DC2626',
+                              '#2563EB',
+                              '#DB2777',
+                              '#4B5563',
+                              '#65A30D',
+                            ],
+                            borderWidth: 2,
+                          },
+                        ],
+                      }}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          legend: {
+                            position: 'bottom' as const,
+                            labels: {
+                              padding: 20,
+                              usePointStyle: true,
+                            },
+                          },
+                          tooltip: {
+                            callbacks: {
+                              label: (context) => {
+                                const stat = analytics.fileTypeStats[context.dataIndex]
+                                return `${context.label}: ${context.parsed} files (${stat.percentage}%)`
+                              },
+                            },
+                          },
+                        },
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Bar Chart */}
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
+                  <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                    <DocumentIcon className="h-6 w-6 text-blue-600 mr-2" />
+                    File Count by Type
+                  </h3>
+                  <div className="relative h-80">
+                    <Bar
+                      data={{
+                        labels: analytics.fileTypeStats.map(stat => stat.type),
+                        datasets: [
+                          {
+                            label: 'Number of Files',
+                            data: analytics.fileTypeStats.map(stat => stat.count),
+                            backgroundColor: 'rgba(139, 92, 246, 0.8)',
+                            borderColor: 'rgba(139, 92, 246, 1)',
+                            borderWidth: 2,
+                            borderRadius: 8,
+                          },
+                        ],
+                      }}
+                      options={{
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                          legend: {
+                            display: false,
+                          },
+                          tooltip: {
+                            callbacks: {
+                              label: (context) => {
+                                const stat = analytics.fileTypeStats[context.dataIndex]
+                                return `${context.parsed.y} files (${stat.percentage}%)`
+                              },
+                            },
+                          },
+                        },
+                        scales: {
+                          y: {
+                            beginAtZero: true,
+                            ticks: {
+                              stepSize: 1,
+                            },
+                          },
+                        },
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* File Type Statistics Table */}
+            {analytics?.fileTypeStats && analytics.fileTypeStats.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-200 mb-8">
+                <div className="p-8">
+                  <h3 className="text-xl font-bold text-gray-900 mb-6">File Type Details</h3>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            File Type
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Count
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Percentage
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Visual
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {analytics.fileTypeStats.map((stat, index) => (
+                          <tr key={stat.type} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                              {stat.type}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {stat.count} files
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                              {stat.percentage}%
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div
+                                  className="bg-gradient-to-r from-purple-500 to-purple-600 h-2 rounded-full"
+                                  style={{ width: `${stat.percentage}%` }}
+                                ></div>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Recent Activities */}
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200">
               <div className="p-8">
@@ -248,8 +440,6 @@ export default function AnalyticsPage() {
           </div>
         </div>
         
-        {/* Footer for content area only */}
-        <Footer />
       </main>
     </div>
   )

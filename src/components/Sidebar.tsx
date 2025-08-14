@@ -86,18 +86,18 @@ export default function Sidebar() {
   }
 
   return (
-    <div className="fixed left-0 top-0 bottom-0 flex flex-col w-64 bg-gradient-to-b from-gray-900 to-black text-white shadow-2xl z-30 h-screen">
-      {/* Company Logo Section */}
-      <div className="px-6 py-6 bg-gradient-to-r from-black to-gray-900 border-b border-gray-700 flex-shrink-0">
-        <div className="flex items-center space-x-4">
-          <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl border-2 border-blue-400/30">
+    <div className="fixed left-0 top-0 bottom-0 flex flex-col w-64 bg-white border-r border-gray-200 shadow-lg z-30 h-screen">
+      {/* Company Logo Section - Clean & Minimal */}
+      <div className="px-6 py-8 border-b border-gray-100 flex-shrink-0">
+        <Link href="/dashboard" className="flex items-center space-x-4 group">
+          <div className="w-14 h-14 flex items-center justify-center">
             {companySettings.companyLogo ? (
               <Image
                 src={companySettings.companyLogo}
                 alt="Company Logo"
-                width={40}
-                height={40}
-                className="w-10 h-10 object-contain"
+                width={56}
+                height={56}
+                className="w-14 h-14 object-contain"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none'
                   const fallbackIcon = e.currentTarget.nextElementSibling as HTMLElement
@@ -107,119 +107,120 @@ export default function Sidebar() {
                 }}
               />
             ) : (
-              <CloudIcon className="h-10 w-10 text-white" />
+              <CloudIcon className="h-14 w-14 text-gray-400" />
             )}
-            <CloudIcon className="h-10 w-10 text-white hidden" />
+            <CloudIcon className="h-14 w-14 text-gray-400 hidden" />
           </div>
           <div className="flex-1">
-            <h1 className="text-white text-2xl font-bold tracking-tight mb-1">{companySettings.companyName}</h1>
-            <p className="text-blue-300 text-sm font-medium opacity-90">Enterprise File Management</p>
+            <h1 className="text-gray-900 text-lg font-semibold">{companySettings.companyName}</h1>
+            <p className="text-gray-500 text-xs">File Management</p>
           </div>
-        </div>
+        </Link>
       </div>
 
-      {/* User Profile Section */}
+      {/* User Profile Section - Simplified */}
       {session?.user && (
-        <div className="px-6 py-4 bg-gray-800/40 border-b border-gray-700 flex-shrink-0">
-          <div className="flex items-center space-x-3 p-4 bg-gradient-to-r from-gray-800/60 to-gray-700/60 rounded-xl border border-gray-600/30 backdrop-blur-sm">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg border-2 border-blue-400/30">
-              <span className="text-white font-bold text-lg">
+        <div className="px-6 py-4 border-b border-gray-100 flex-shrink-0">
+          <Link href="/profile" className="flex items-center space-x-3 group hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors">
+            <div className="w-8 h-8 bg-gray-900 rounded-lg flex items-center justify-center">
+              <span className="text-white font-medium text-sm">
                 {session.user.name?.charAt(0).toUpperCase()}
               </span>
             </div>
             <div className="flex-1 min-w-0">
-              <Link 
-                href="/profile"
-                className="text-white text-sm font-semibold truncate hover:text-blue-300 transition-colors cursor-pointer block mb-1"
-              >
+              <p className="text-gray-900 text-sm font-medium truncate group-hover:text-blue-600 transition-colors">
                 {session.user.name}
-              </Link>
-              <p className="text-blue-200 text-sm font-medium truncate mb-2">
-                ID: {session.user.employeeId || session.user.id?.substring(0, 12) || 'N/A'}
               </p>
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-sm border border-emerald-400/30">
-                {session.user.role?.replace('_', ' ')}
-              </span>
+              <div className="flex items-center space-x-2 mt-1">
+                <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-600">
+                  {session.user.role?.replace('_', ' ')}
+                </span>
+              </div>
             </div>
-          </div>
+          </Link>
         </div>
       )}
       
-      <div className="flex-1 flex flex-col pt-6 pb-4 min-h-0">
-        <nav className="flex-1 px-6 space-y-2 overflow-y-auto scrollbar-hide">
-          <div className="mb-4">
-            <h3 className="text-gray-300 text-xs font-bold uppercase tracking-wider mb-3 flex items-center">
-              <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-              Navigation
-            </h3>
+      <div className="flex-1 flex flex-col py-6 min-h-0">
+        <nav className="flex-1 px-6 space-y-1 overflow-y-auto">
+          {/* Main Navigation */}
+          <div className="space-y-1">
+            {navigation.map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  isActive(item.href)
+                    ? 'bg-blue-600 text-white'
+                    : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+                }`}
+              >
+                <item.icon className={`mr-3 h-5 w-5 ${
+                  isActive(item.href)
+                    ? 'text-white'
+                    : 'text-gray-400 group-hover:text-gray-600'
+                }`} />
+                {item.name}
+              </Link>
+            ))}
           </div>
-          {navigation.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
-                isActive(item.href)
-                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg transform scale-105'
-                  : 'text-gray-300 hover:bg-gradient-to-r hover:from-blue-600/20 hover:to-purple-600/20 hover:text-white'
-              }`}
-            >
-              <item.icon className={`mr-3 h-5 w-5 transition-colors ${
-                isActive(item.href)
-                  ? 'text-white'
-                  : 'text-gray-400 group-hover:text-white'
-              }`} />
-              {item.name}
-            </Link>
-          ))}
           
+          {/* Admin Navigation */}
           {isAdmin && (
-            <>
-              <div className="border-t border-gray-700 mt-8 pt-6">
-                <h3 className="px-4 text-xs font-bold text-gray-300 uppercase tracking-wider mb-4 flex items-center">
-                  <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
-                  Administration
-                </h3>
-                <div className="space-y-2">
-                  {adminNavigation.map((item) => (
-                    <Link
-                      key={item.name}
-                      href={item.href}
-                      className={`group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
-                        isActive(item.href)
-                          ? 'bg-gradient-to-r from-red-600 to-pink-600 text-white shadow-lg transform scale-105'
-                          : 'text-gray-300 hover:bg-gradient-to-r hover:from-red-600/20 hover:to-pink-600/20 hover:text-white'
-                      }`}
-                    >
-                      <item.icon className={`mr-3 h-5 w-5 transition-colors ${
-                        isActive(item.href)
-                          ? 'text-white'
-                          : 'text-gray-400 group-hover:text-white'
-                      }`} />
-                      {item.name}
-                    </Link>
-                  ))}
-                </div>
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+                Administration
+              </h3>
+              <div className="space-y-1">
+                {adminNavigation.map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={`group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      isActive(item.href)
+                        ? 'bg-red-600 text-white'
+                        : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+                    }`}
+                  >
+                    <item.icon className={`mr-3 h-5 w-5 ${
+                      isActive(item.href)
+                        ? 'text-white'
+                        : 'text-gray-400 group-hover:text-gray-600'
+                    }`} />
+                    {item.name}
+                  </Link>
+                ))}
               </div>
-            </>
+            </div>
           )}
         </nav>
 
-        <div className="flex-shrink-0 px-6 py-4 border-t border-gray-700">
-          <button
-            onClick={async () => {
-              try {
-                await signOut({ callbackUrl: '/auth/signin', redirect: true })
-              } catch (error) {
-                console.error('Logout error:', error)
-                // Force redirect if signOut fails
-                window.location.href = '/auth/signin'
-              }
-            }}
-            className="w-full group flex items-center px-4 py-3 text-sm font-medium text-gray-300 rounded-xl hover:bg-gradient-to-r hover:from-red-600 hover:to-red-700 hover:text-white transition-all duration-200 transform hover:scale-105"
-          >
-            <ArrowRightOnRectangleIcon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-white transition-colors" />
-            Sign Out
-          </button>
+        {/* Sign Out Button and Footer - Always at bottom */}
+        <div className="flex-shrink-0 mt-auto">
+          <div className="px-6 py-4 border-t border-gray-200">
+            <button
+              onClick={async () => {
+                try {
+                  await signOut({ callbackUrl: '/auth/signin', redirect: true })
+                } catch (error) {
+                  console.error('Logout error:', error)
+                  window.location.href = '/auth/signin'
+                }
+              }}
+              className="w-full group flex items-center px-3 py-2 text-sm font-medium text-gray-700 rounded-lg hover:text-gray-900 hover:bg-gray-100 transition-colors mb-4"
+            >
+              <ArrowRightOnRectangleIcon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-600" />
+              Sign Out
+            </button>
+            
+            {/* Footer in Sidebar - Always at bottom */}
+            <div className="pt-4 border-t border-gray-200">
+              <div className="flex items-center justify-between text-xs text-gray-500">
+                <span>© 2025 {companySettings.companyName}</span>
+                <span>Ahmed Fathy</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

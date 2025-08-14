@@ -5,7 +5,6 @@ import { redirect } from 'next/navigation'
 import { useState, useMemo } from 'react'
 import FileList from '@/components/FileList'
 import Sidebar from '@/components/Sidebar'
-import Footer from '@/components/Footer'
 import { 
   FolderIcon, 
   ArrowLeftIcon, 
@@ -177,8 +176,6 @@ export default function FilesPage() {
           </div>
         </div>
         
-        {/* Footer for content area only */}
-        <Footer />
       </main>
     </div>
   )
