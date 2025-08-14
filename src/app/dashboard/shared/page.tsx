@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { redirect } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
-import Footer from '@/components/Footer'
 import { 
   ShareIcon, 
   EyeIcon, 
@@ -194,7 +193,6 @@ export default function SharedPage() {
               </div>
             </div>
           </div>
-          <Footer />
         </main>
       </div>
     )
@@ -399,8 +397,6 @@ export default function SharedPage() {
           </div>
         </div>
         
-        {/* Footer for content area only */}
-        <Footer />
       </main>
     </div>
   )

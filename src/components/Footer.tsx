@@ -31,26 +31,14 @@ export default function Footer() {
   }, [])
 
   return (
-    <footer className="bg-gradient-to-b from-gray-900 to-black text-gray-300 py-3 mt-auto">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col sm:flex-row items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <span className="text-xs">
-              © 2025 {companySettings?.companyName || 'PMS Cloud'}. All rights reserved.
-            </span>
-          </div>
-          <div className="flex items-center space-x-1 mt-1 sm:mt-0">
-            <span className="text-xs">
-              Developed and designed by
-            </span>
-            <a
-              href="mailto:ahmed.fathy@pms.eg"
-              className="text-blue-400 hover:text-blue-300 transition-colors font-medium text-xs"
-            >
-              Ahmed Fathy
-            </a>
-          </div>
-        </div>
+    <footer className="bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white py-3">
+      <div className="px-8 flex items-center justify-between">
+        <span className="text-sm">
+          © 2025 {companySettings?.companyName || 'PMS Cloud'}
+        </span>
+        <span className="text-sm">
+          Ahmed Fathy
+        </span>
       </div>
     </footer>
   )

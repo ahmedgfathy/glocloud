@@ -14,7 +14,6 @@ import {
   FunnelIcon
 } from '@heroicons/react/24/outline'
 import Sidebar from '@/components/Sidebar'
-import Footer from '@/components/Footer'
 
 interface User {
   id: string
@@ -263,7 +262,6 @@ export default function AdminUsersPage() {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
             </div>
           </div>
-          <Footer />
         </main>
       </div>
     )
@@ -574,8 +572,6 @@ export default function AdminUsersPage() {
           </div>
         </div>
         
-        {/* Footer for content area only */}
-        <Footer />
       </main>
     </div>
   )

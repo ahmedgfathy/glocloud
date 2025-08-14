@@ -17,7 +17,6 @@ import {
   CameraIcon
 } from '@heroicons/react/24/outline'
 import Sidebar from '@/components/Sidebar'
-import Footer from '@/components/Footer'
 
 interface UserProfile {
   id: string
@@ -280,7 +279,6 @@ export default function ProfilePage() {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
             </div>
           </div>
-          <Footer />
         </main>
       </div>
     )
@@ -613,8 +611,6 @@ export default function ProfilePage() {
           </div>
         </div>
         
-        {/* Footer for content area only */}
-        <Footer />
       </main>
     </div>
   )

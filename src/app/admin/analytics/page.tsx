@@ -4,7 +4,6 @@ import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 import { ChartBarIcon, UsersIcon, DocumentIcon, ShareIcon } from '@heroicons/react/24/outline'
 import Sidebar from '@/components/Sidebar'
-import Footer from '@/components/Footer'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -75,7 +74,6 @@ export default function AnalyticsPage() {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
             </div>
           </div>
-          <Footer />
         </main>
       </div>
     )
@@ -94,7 +92,6 @@ export default function AnalyticsPage() {
               </div>
             </div>
           </div>
-          <Footer />
         </main>
       </div>
     )
@@ -443,8 +440,6 @@ export default function AnalyticsPage() {
           </div>
         </div>
         
-        {/* Footer for content area only */}
-        <Footer />
       </main>
     </div>
   )

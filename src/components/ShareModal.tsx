@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { XMarkIcon, UserIcon, CheckIcon, LinkIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline'
+import { XMarkIcon, UserIcon, CheckIcon } from '@heroicons/react/24/outline'
 
 interface User {
   id: string
@@ -25,21 +25,10 @@ export default function ShareModal({ isOpen, onClose, fileId, fileName }: ShareM
   const [expiresAt, setExpiresAt] = useState('')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
-  const [shareType, setShareType] = useState<'user' | 'public'>('user')
-  const [publicLink, setPublicLink] = useState('')
-  const [publicLinkCopied, setPublicLinkCopied] = useState(false)
 
   useEffect(() => {
     if (isOpen) {
       fetchUsers()
-      // Reset form state when opening
-      setSelectedUser('')
-      setPermission('VIEW')
-      setExpiresAt('')
-      setMessage('')
-      setPublicLink('')
-      setPublicLinkCopied(false)
-      setShareType('user')
     }
   }, [isOpen])
 
@@ -56,7 +45,7 @@ export default function ShareModal({ isOpen, onClose, fileId, fileName }: ShareM
   }
 
   const handleShare = async () => {
-    if (shareType === 'user' && !selectedUser) {
+    if (!selectedUser) {
       setMessage('Please select a user to share with')
       return
     }
@@ -79,10 +68,13 @@ export default function ShareModal({ isOpen, onClose, fileId, fileName }: ShareM
 
       if (response.ok) {
         setMessage('File shared successfully!')
-        // Auto-close after 1 second
         setTimeout(() => {
           onClose()
-        }, 1000)
+          setMessage('')
+          setSelectedUser('')
+          setPermission('VIEW')
+          setExpiresAt('')
+        }, 1500)
       } else {
         const error = await response.json()
         setMessage(error.error || 'Failed to share file')
@@ -92,48 +84,6 @@ export default function ShareModal({ isOpen, onClose, fileId, fileName }: ShareM
       setMessage('Failed to share file')
     } finally {
       setLoading(false)
-    }
-  }
-
-  const handleCreatePublicLink = async () => {
-    setLoading(true)
-    setMessage('')
-
-    try {
-      const response = await fetch(`/api/files/${fileId}/public-share`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          permissions: permission,
-          expiresAt: expiresAt || null
-        })
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setPublicLink(data.publicLink)
-        setMessage('Public link created successfully!')
-      } else {
-        const error = await response.json()
-        setMessage(error.error || 'Failed to create public link')
-      }
-    } catch (error) {
-      console.error('Error creating public link:', error)
-      setMessage('Failed to create public link')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const copyToClipboard = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text)
-      setPublicLinkCopied(true)
-      setTimeout(() => setPublicLinkCopied(false), 2000)
-    } catch (error) {
-      console.error('Failed to copy to clipboard:', error)
     }
   }
 
@@ -159,97 +109,24 @@ export default function ShareModal({ isOpen, onClose, fileId, fileName }: ShareM
             </p>
           </div>
 
-          {/* Share Type Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Share type
+              Share with user
             </label>
-            <div className="flex space-x-4">
-              <button
-                type="button"
-                onClick={() => setShareType('user')}
-                className={`flex-1 p-3 rounded-lg border-2 transition-all ${
-                  shareType === 'user'
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                <UserIcon className="h-5 w-5 mx-auto mb-1" />
-                <div className="text-sm font-medium">Specific User</div>
-                <div className="text-xs text-gray-500">Share with company users</div>
-              </button>
-              <button
-                type="button"
-                onClick={() => setShareType('public')}
-                className={`flex-1 p-3 rounded-lg border-2 transition-all ${
-                  shareType === 'public'
-                    ? 'border-purple-500 bg-purple-50 text-purple-700'
-                    : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                <LinkIcon className="h-5 w-5 mx-auto mb-1" />
-                <div className="text-sm font-medium">Public Link</div>
-                <div className="text-xs text-gray-500">Share with anyone</div>
-              </button>
-            </div>
+            <select
+              value={selectedUser}
+              onChange={(e) => setSelectedUser(e.target.value)}
+              className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Select a user...</option>
+              {users.map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.name} ({user.email})
+                  {user.isExternal && ' - External'}
+                </option>
+              ))}
+            </select>
           </div>
-
-          {shareType === 'user' && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Share with user
-              </label>
-              <select
-                value={selectedUser}
-                onChange={(e) => setSelectedUser(e.target.value)}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select a user...</option>
-                {users.map((user) => (
-                  <option key={user.id} value={user.id}>
-                    {user.name} ({user.email})
-                    {user.isExternal && ' - External'}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          {shareType === 'public' && publicLink && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Public Link
-              </label>
-              <div className="flex space-x-2">
-                <input
-                  type="text"
-                  value={publicLink}
-                  readOnly
-                  className="flex-1 border border-gray-300 rounded-md px-3 py-2 bg-gray-50 text-sm"
-                />
-                <button
-                  onClick={() => copyToClipboard(publicLink)}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-all ${
-                    publicLinkCopied
-                      ? 'bg-green-100 text-green-700 border border-green-300'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
-                  }`}
-                >
-                  {publicLinkCopied ? (
-                    <>
-                      <CheckIcon className="h-4 w-4 inline mr-1" />
-                      Copied!
-                    </>
-                  ) : (
-                    <>
-                      <DocumentDuplicateIcon className="h-4 w-4 inline mr-1" />
-                      Copy
-                    </>
-                  )}
-                </button>
-              </div>
-            </div>
-          )}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -291,28 +168,18 @@ export default function ShareModal({ isOpen, onClose, fileId, fileName }: ShareM
           )}
 
           <div className="flex space-x-3 pt-4">
-            {shareType === 'user' ? (
-              <button
-                onClick={handleShare}
-                disabled={loading || !selectedUser}
-                className="flex-1 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Sharing...' : 'Share File'}
-              </button>
-            ) : (
-              <button
-                onClick={handleCreatePublicLink}
-                disabled={loading}
-                className="flex-1 bg-purple-500 text-white px-4 py-2 rounded-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-300 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? 'Creating Link...' : publicLink ? 'Update Link' : 'Create Public Link'}
-              </button>
-            )}
+            <button
+              onClick={handleShare}
+              disabled={loading || !selectedUser}
+              className="flex-1 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Sharing...' : 'Share File'}
+            </button>
             <button
               onClick={onClose}
               className="flex-1 bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300"
             >
-              {shareType === 'public' && publicLink ? 'Done' : 'Cancel'}
+              Cancel
             </button>
           </div>
         </div>

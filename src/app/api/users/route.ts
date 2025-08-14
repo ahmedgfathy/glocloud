@@ -23,11 +23,6 @@ export async function GET(request: NextRequest) {
           role: true,
           isActive: true,
           isExternal: true,
-          department: true,
-          employeeId: true,
-          mobile: true,
-          phoneExt: true,
-          title: true,
           createdAt: true,
           updatedAt: true
         },

@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
-import Footer from '@/components/Footer';
 import {
   FolderIcon,
   DocumentIcon,
@@ -157,7 +156,6 @@ export default function FileStructurePage() {
           <div className="flex-1 overflow-y-auto content-scrollable flex items-center justify-center">
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
           </div>
-          <Footer />
         </main>
       </div>
     );
@@ -368,8 +366,6 @@ export default function FileStructurePage() {
           </div>
         </div>
         
-        {/* Footer for content area only */}
-        <Footer />
       </main>
     </div>
   );

@@ -5,7 +5,6 @@ import { redirect } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import FileUpload from '@/components/FileUpload'
 import Sidebar from '@/components/Sidebar'
-import Footer from '@/components/Footer'
 import Link from 'next/link'
 import { 
   FolderIcon, 
@@ -489,8 +488,6 @@ export default function Dashboard() {
           </div>
         </div>
         
-        {/* Footer for content area only */}
-        <Footer />
       </main>
     </div>
   )

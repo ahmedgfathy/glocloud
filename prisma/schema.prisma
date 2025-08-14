@@ -34,7 +34,6 @@ model User {
   // Relations
   ownedFiles     File[]        @relation("FileOwner")
   sharedFiles    FileShare[]
-  publicShares   PublicFileShare[] @relation("PublicShares")
   activities     Activity[]
   notifications  Notification[]
   invitedBy      User?         @relation("UserInvites", fields: [invitedById], references: [id])
@@ -63,7 +62,6 @@ model File {
   parent       File?        @relation("FileHierarchy", fields: [parentId], references: [id])
   children     File[]       @relation("FileHierarchy")
   shares       FileShare[]
-  publicShares PublicFileShare[]
   activities   Activity[]
 
   @@map("files")
@@ -83,25 +81,6 @@ model FileShare {
 
   @@unique([fileId, userId])
   @@map("file_shares")
-}
-
-model PublicFileShare {
-  id          String          @id @default(cuid())
-  fileId      String
-  token       String          @unique
-  permission  FilePermission  @default(VIEW)
-  expiresAt   DateTime?
-  accessCount Int             @default(0)
-  lastAccessed DateTime?
-  createdById String
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-
-  // Relations
-  file        File            @relation(fields: [fileId], references: [id], onDelete: Cascade)
-  createdBy   User            @relation("PublicShares", fields: [createdById], references: [id], onDelete: Cascade)
-
-  @@map("public_file_shares")
 }
 
 model Activity {
@@ -163,7 +142,6 @@ enum UserRole {
 
 enum FilePermission {
   VIEW
-  DOWNLOAD
   EDIT
   FULL_ACCESS
 }
@@ -175,8 +153,6 @@ enum ActivityType {
   FILE_DOWNLOAD
   FILE_DELETE
   FILE_SHARE
-  FILE_PUBLIC_SHARE
-  FILE_PUBLIC_UNSHARE
   FILE_EDIT
   FILE_VIEW
   FOLDER_CREATE
