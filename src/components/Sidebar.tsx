@@ -88,16 +88,17 @@ export default function Sidebar() {
   return (
     <div className="fixed left-0 top-0 bottom-0 flex flex-col w-64 bg-white border-r border-gray-200 shadow-lg z-30 h-screen">
       {/* Company Logo Section - Clean & Minimal */}
-      <div className="px-6 py-8 border-b border-gray-100 flex-shrink-0">
-        <Link href="/dashboard" className="flex items-center space-x-4 group">
-          <div className="w-14 h-14 flex items-center justify-center">
+      <div className="px-4 py-4 border-b border-gray-100 flex-shrink-0">
+        {/* Logo Section */}
+        <div className="flex justify-center mb-3">
+          <Link href="/dashboard" className="w-24 h-24 flex items-center justify-center">
             {companySettings.companyLogo ? (
               <Image
                 src={companySettings.companyLogo}
                 alt="Company Logo"
-                width={56}
-                height={56}
-                className="w-14 h-14 object-contain"
+                width={192}
+                height={192}
+                className="w-48 h-48 object-contain"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none'
                   const fallbackIcon = e.currentTarget.nextElementSibling as HTMLElement
@@ -107,15 +108,17 @@ export default function Sidebar() {
                 }}
               />
             ) : (
-              <CloudIcon className="h-14 w-14 text-gray-400" />
+              <CloudIcon className="h-48 w-48 text-gray-400" />
             )}
-            <CloudIcon className="h-14 w-14 text-gray-400 hidden" />
-          </div>
-          <div className="flex-1">
-            <h1 className="text-gray-900 text-lg font-semibold">{companySettings.companyName}</h1>
-            <p className="text-gray-500 text-xs">File Management</p>
-          </div>
-        </Link>
+            <CloudIcon className="h-48 w-48 text-gray-400 hidden" />
+          </Link>
+        </div>
+        
+        {/* Title Section - Independent */}
+        <div className="text-center">
+          <h1 className="text-gray-900 text-base font-semibold">{companySettings.companyName}</h1>
+          <p className="text-gray-500 text-xs">File Management</p>
+        </div>
       </div>
 
       {/* User Profile Section - Simplified */}

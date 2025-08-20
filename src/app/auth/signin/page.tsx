@@ -24,6 +24,24 @@ export default function SignIn() {
   })
 
   useEffect(() => {
+    // Security: Clear any sensitive URL parameters
+    const url = new URL(window.location.href)
+    const sensitiveParams = ['password', 'token', 'secret', 'key', 'credentials']
+    let hasSensitiveData = false
+    
+    sensitiveParams.forEach(param => {
+      if (url.searchParams.has(param)) {
+        console.warn('🚨 SECURITY: Removing sensitive parameter from URL:', param)
+        url.searchParams.delete(param)
+        hasSensitiveData = true
+      }
+    })
+    
+    // If we found sensitive data, clean the URL
+    if (hasSensitiveData) {
+      window.history.replaceState({}, document.title, url.pathname)
+    }
+    
     // Fetch company settings for display
     const fetchCompanySettings = async () => {
       try {

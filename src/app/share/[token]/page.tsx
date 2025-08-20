@@ -176,23 +176,23 @@ export default function PublicSharePage() {
 
   const getFileIcon = () => {
     if (fileData?.isFolder) {
-      return <FolderIcon className="h-8 w-8" />
+      return <FolderIcon className="h-8 w-8 text-white" />
     }
 
     const mimeType = fileData?.mimeType || ''
     
     if (mimeType.startsWith('image/')) {
-      return <PhotoIcon className="h-8 w-8" />
+      return <PhotoIcon className="h-8 w-8 text-white" />
     } else if (mimeType.startsWith('video/')) {
-      return <FilmIcon className="h-8 w-8" />
+      return <FilmIcon className="h-8 w-8 text-white" />
     } else if (mimeType.startsWith('audio/')) {
-      return <MusicalNoteIcon className="h-8 w-8" />
+      return <MusicalNoteIcon className="h-8 w-8 text-white" />
     } else if (mimeType.includes('text/') || mimeType.includes('json') || mimeType.includes('css') || mimeType.includes('javascript')) {
-      return <CodeBracketIcon className="h-8 w-8" />
+      return <CodeBracketIcon className="h-8 w-8 text-white" />
     } else if (mimeType.includes('pdf') || mimeType.includes('document') || mimeType.includes('word')) {
-      return <DocumentTextIcon className="h-8 w-8" />
+      return <DocumentTextIcon className="h-8 w-8 text-white" />
     } else {
-      return <DocumentIcon className="h-8 w-8" />
+      return <DocumentIcon className="h-8 w-8 text-white" />
     }
   }
 
@@ -280,11 +280,11 @@ export default function PublicSharePage() {
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
             <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6">
               <div className="flex items-center space-x-4 text-white">
-                <div className="bg-white/20 rounded-lg p-3">
+                <div className="bg-white/20 rounded-lg p-3 text-white">
                   {getFileIcon()}
                 </div>
                 <div>
-                  <h2 className="text-xl font-semibold">{fileData?.originalName}</h2>
+                  <h2 className="text-xl font-semibold text-white">{fileData?.originalName}</h2>
                   <p className="text-blue-100">{formatFileSize(fileData?.calculatedSize || fileData?.size || 0)}</p>
                 </div>
               </div>
@@ -295,19 +295,19 @@ export default function PublicSharePage() {
               <div className="grid grid-cols-2 gap-4 mb-6">
                 <div>
                   <p className="text-sm text-gray-500">File Type</p>
-                  <p className="font-medium">
+                  <p className="font-medium text-gray-900">
                     {fileData?.isFolder ? 'Folder' : (fileData?.mimeType || 'Unknown')}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Uploaded</p>
-                  <p className="font-medium">
+                  <p className="font-medium text-gray-900">
                     {fileData?.createdAt ? formatDate(fileData.createdAt) : 'Unknown'}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-500">Downloads</p>
-                  <p className="font-medium">
+                  <p className="font-medium text-gray-900">
                     {fileData?.downloads || 0}
                     {fileData?.maxDownloads && ` / ${fileData.maxDownloads}`}
                   </p>
@@ -315,7 +315,7 @@ export default function PublicSharePage() {
                 {fileData?.expiresAt && (
                   <div>
                     <p className="text-sm text-gray-500">Expires</p>
-                    <p className={`font-medium ${isExpired ? 'text-red-600' : ''}`}>
+                    <p className={`font-medium ${isExpired ? 'text-red-600' : 'text-gray-900'}`}>
                       {formatDate(fileData.expiresAt)}
                     </p>
                   </div>

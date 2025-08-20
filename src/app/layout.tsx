@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { SessionProvider } from './providers/SessionProvider'
 import Footer from '@/components/Footer'
 import DynamicFavicon from '@/components/DynamicFavicon'
+import SecurityWarning from '@/components/SecurityWarning'
 import { prisma } from '@/lib/prisma'
 import "./globals.css";
 
@@ -38,6 +39,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="h-screen overflow-hidden">
         <DynamicFavicon />
+        <SecurityWarning />
         <SessionProvider>
           <div className="h-full">
             {children}

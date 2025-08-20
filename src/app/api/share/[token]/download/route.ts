@@ -123,7 +123,7 @@ export async function POST(
 
             // Add files to archive
             folderFiles.forEach(file => {
-              const filePath = path.join(process.cwd(), 'uploads', file.name)
+              const filePath = path.join(process.cwd(), file.path)
               if (fs.existsSync(filePath) && !file.isFolder) {
                 archive.file(filePath, { name: file.originalName })
               }
@@ -141,7 +141,7 @@ export async function POST(
       )
     } else {
       // Handle single file download
-      const filePath = path.join(process.cwd(), 'uploads', publicShare.file.name)
+      const filePath = path.join(process.cwd(), publicShare.file.path)
 
       // Check if file exists
       if (!fs.existsSync(filePath)) {

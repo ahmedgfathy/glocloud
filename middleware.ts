@@ -2,6 +2,28 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export function middleware(request: NextRequest) {
+  // Security: Check for credentials in URL and block/redirect
+  const url = request.url
+  const urlParams = new URL(url).searchParams
+  
+  // Check for password or other sensitive data in URL parameters
+  const sensitiveParams = ['password', 'token', 'secret', 'key', 'credentials']
+  const hasSensitiveData = sensitiveParams.some(param => urlParams.has(param))
+  
+  if (hasSensitiveData) {
+    console.warn('🚨 SECURITY ALERT: Sensitive data detected in URL:', url)
+    
+    // Redirect to clean signin page without parameters
+    if (request.nextUrl.pathname.includes('/auth/signin')) {
+      return NextResponse.redirect(new URL('/auth/signin', request.url))
+    }
+    
+    // For other pages, return 400 Bad Request
+    return new NextResponse('Bad Request: Sensitive data in URL not allowed', { 
+      status: 400 
+    })
+  }
+  
   // Clone the request headers and add custom headers for IP tracking
   const requestHeaders = new Headers(request.headers)
   
@@ -37,6 +59,9 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    // Security checks for all routes
+    '/((?!_next/static|_next/image|favicon.ico).*)',
+    // IP tracking for API routes
     '/api/auth/:path*',
     '/api/files/:path*',
     '/api/profile/:path*',

@@ -20,7 +20,7 @@ async function calculateFolderSize(folderId: string): Promise<number> {
     } else {
       // Try to get actual file size from filesystem
       try {
-        const filePath = path.join(process.cwd(), 'uploads', file.name)
+        const filePath = path.join(process.cwd(), file.path)
         if (fs.existsSync(filePath)) {
           const stats = fs.statSync(filePath)
           totalSize += stats.size
@@ -95,8 +95,21 @@ export async function GET(
         downloads: publicShare.downloads,
         maxDownloads: publicShare.maxDownloads,
         expiresAt: publicShare.expiresAt,
-        // Add calculated folder size for folders
-        calculatedSize: publicShare.file.isFolder ? await calculateFolderSize(publicShare.file.id) : publicShare.file.size
+        // Add calculated folder size for folders or actual file size for files
+        calculatedSize: publicShare.file.isFolder 
+          ? await calculateFolderSize(publicShare.file.id) 
+          : (() => {
+              try {
+                const filePath = path.join(process.cwd(), publicShare.file.path)
+                if (fs.existsSync(filePath)) {
+                  const stats = fs.statSync(filePath)
+                  return stats.size
+                }
+                return publicShare.file.size
+              } catch {
+                return publicShare.file.size
+              }
+            })()
       },
       sharedBy: publicShare.creator.name
     })
@@ -190,8 +203,21 @@ export async function POST(
         downloads: publicShare.downloads,
         maxDownloads: publicShare.maxDownloads,
         expiresAt: publicShare.expiresAt,
-        // Add calculated folder size for folders
-        calculatedSize: publicShare.file.isFolder ? await calculateFolderSize(publicShare.file.id) : publicShare.file.size
+        // Add calculated folder size for folders or actual file size for files
+        calculatedSize: publicShare.file.isFolder 
+          ? await calculateFolderSize(publicShare.file.id) 
+          : (() => {
+              try {
+                const filePath = path.join(process.cwd(), publicShare.file.path)
+                if (fs.existsSync(filePath)) {
+                  const stats = fs.statSync(filePath)
+                  return stats.size
+                }
+                return publicShare.file.size
+              } catch {
+                return publicShare.file.size
+              }
+            })()
       },
       sharedBy: publicShare.creator.name
     })

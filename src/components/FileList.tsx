@@ -15,6 +15,7 @@ import {
   CalendarIcon
 } from '@heroicons/react/24/outline'
 import ShareModal from './ShareModal'
+import BulkShareModal from './BulkShareModal'
 
 interface FileItem {
   id: string
@@ -48,7 +49,10 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger, sear
   const [loading, setLoading] = useState(true)
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [shareModal, setShareModal] = useState<{ fileId: string; fileName: string } | null>(null)
+  const [bulkShareModal, setBulkShareModal] = useState<{ fileIds: string[]; fileNames: string[] } | null>(null)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
+  const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set())
+  const [showBulkActions, setShowBulkActions] = useState(false)
   
   const isAdmin = session?.user?.role === 'SUPER_ADMIN' || session?.user?.role === 'ADMIN'
 
@@ -129,6 +133,21 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger, sear
                      file.mimeType.includes('powerpoint') ||
                      file.originalName.endsWith('.ppt') ||
                      file.originalName.endsWith('.pptx')
+            case 'code':
+              return file.mimeType.includes('javascript') || 
+                     file.mimeType.includes('json') ||
+                     file.mimeType.includes('css') ||
+                     file.mimeType.includes('html') ||
+                     ['js', 'jsx', 'ts', 'tsx', 'css', 'html', 'json', 'xml', 'sql', 'php', 'py', 'java', 'cpp', 'c', 'h'].includes(file.originalName.split('.').pop()?.toLowerCase() || '')
+            case 'text':
+              return file.mimeType.startsWith('text/') ||
+                     ['txt', 'log', 'md', 'readme'].includes(file.originalName.split('.').pop()?.toLowerCase() || '')
+            case 'executables':
+              return file.mimeType.includes('executable') ||
+                     file.mimeType.includes('application/x-msdownload') ||
+                     file.mimeType.includes('application/x-msdos-program') ||
+                     file.mimeType.includes('application/x-ms-installer') ||
+                     ['exe', 'msi', 'dmg', 'pkg', 'deb', 'rpm', 'app', 'run', 'bin', 'com', 'bat', 'cmd', 'sh', 'scr'].includes(file.originalName.split('.').pop()?.toLowerCase() || '')
             default:
               return true
           }
@@ -141,6 +160,65 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger, sear
       }
     })
   }, [files, searchTerm, fileTypeFilter])
+
+  // Multi-select helper functions
+  const handleSelectFile = (fileId: string) => {
+    const newSelected = new Set(selectedFiles)
+    if (newSelected.has(fileId)) {
+      newSelected.delete(fileId)
+    } else {
+      newSelected.add(fileId)
+    }
+    setSelectedFiles(newSelected)
+    setShowBulkActions(newSelected.size > 0)
+  }
+
+  const handleSelectAll = () => {
+    if (selectedFiles.size === filteredFiles.length) {
+      setSelectedFiles(new Set())
+      setShowBulkActions(false)
+    } else {
+      setSelectedFiles(new Set(filteredFiles.map(f => f.id)))
+      setShowBulkActions(true)
+    }
+  }
+
+  const handleBulkShare = () => {
+    if (selectedFiles.size === 1) {
+      const fileId = Array.from(selectedFiles)[0]
+      const file = files.find(f => f.id === fileId)
+      if (file) {
+        setShareModal({ fileId: file.id, fileName: file.originalName })
+      }
+    } else if (selectedFiles.size > 1) {
+      const selectedFilesList = Array.from(selectedFiles)
+      const selectedFileNames = selectedFilesList.map(id => {
+        const file = files.find(f => f.id === id)
+        return file ? file.originalName : 'Unknown file'
+      })
+      setBulkShareModal({ 
+        fileIds: selectedFilesList, 
+        fileNames: selectedFileNames 
+      })
+    }
+  }
+
+  const handleBulkDownload = async () => {
+    console.log('Bulk downloading', selectedFiles.size, 'files')
+    // TODO: Implement bulk download functionality
+    for (const fileId of selectedFiles) {
+      const file = files.find(f => f.id === fileId)
+      if (file && !file.isFolder) {
+        // Download each file
+        window.open(`/api/files/${fileId}/download`, '_blank')
+      }
+    }
+  }
+
+  const clearSelection = () => {
+    setSelectedFiles(new Set())
+    setShowBulkActions(false)
+  }
 
   useEffect(() => {
     const fetchFiles = async () => {
@@ -259,6 +337,17 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger, sear
       )
     }
 
+    // Executable files
+    if (mimeType.includes('executable') || mimeType.includes('application/x-msdownload') || 
+        mimeType.includes('application/x-msdos-program') || mimeType.includes('application/x-ms-installer') ||
+        ['exe', 'msi', 'dmg', 'pkg', 'deb', 'rpm', 'app', 'run', 'bin', 'com', 'bat', 'cmd', 'sh', 'scr'].includes(extension)) {
+      return (
+        <div className="w-10 h-10 bg-gradient-to-br from-red-700 to-red-800 rounded-xl flex items-center justify-center shadow-lg">
+          <span className="text-white font-bold text-xs">EXE</span>
+        </div>
+      )
+    }
+
     // Default for unknown file types
     return (
       <div className="w-10 h-10 bg-gradient-to-br from-gray-400 to-gray-500 rounded-xl flex items-center justify-center shadow-lg">
@@ -357,6 +446,17 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger, sear
       return (
         <div className="w-12 h-12 bg-gradient-to-br from-gray-600 to-gray-700 rounded-xl flex items-center justify-center shadow-lg">
           <span className="text-white font-bold text-xs">TXT</span>
+        </div>
+      )
+    }
+
+    // Executable files
+    if (mimeType.includes('executable') || mimeType.includes('application/x-msdownload') || 
+        mimeType.includes('application/x-msdos-program') || mimeType.includes('application/x-ms-installer') ||
+        ['exe', 'msi', 'dmg', 'pkg', 'deb', 'rpm', 'app', 'run', 'bin', 'com', 'bat', 'cmd', 'sh', 'scr'].includes(extension)) {
+      return (
+        <div className="w-12 h-12 bg-gradient-to-br from-red-700 to-red-800 rounded-xl flex items-center justify-center shadow-lg">
+          <span className="text-white font-bold text-xs">EXE</span>
         </div>
       )
     }
@@ -463,7 +563,17 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger, sear
   const GridView = () => (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 p-6">
       {filteredFiles.map((file) => (
-        <div key={file.id} className="bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-200 p-4 group">
+        <div key={file.id} className="bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-200 p-4 group relative">
+          {/* Checkbox */}
+          <div className="absolute top-2 right-2 z-10">
+            <input
+              type="checkbox"
+              checked={selectedFiles.has(file.id)}
+              onChange={() => handleSelectFile(file.id)}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+          </div>
+          
           <div className="flex flex-col items-center text-center">
             {/* File Icon */}
             <div className="w-12 h-12 mb-3 flex items-center justify-center">
@@ -557,6 +667,14 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger, sear
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
+            <th className="px-4 py-4 text-left">
+              <input
+                type="checkbox"
+                checked={selectedFiles.size === filteredFiles.length && filteredFiles.length > 0}
+                onChange={handleSelectAll}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+            </th>
             <th className="px-8 py-4 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">
               Name
             </th>
@@ -582,6 +700,14 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger, sear
         <tbody className="bg-white divide-y divide-gray-200">
           {filteredFiles.map((file) => (
             <tr key={file.id} className="hover:bg-gray-50 transition-colors duration-200">
+              <td className="px-4 py-6 whitespace-nowrap">
+                <input
+                  type="checkbox"
+                  checked={selectedFiles.has(file.id)}
+                  onChange={() => handleSelectFile(file.id)}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+              </td>
               <td className="px-8 py-6 whitespace-nowrap">
                 <div className="flex items-center space-x-4">
                   {getListFileIcon(file)}
@@ -720,6 +846,17 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger, sear
         />
       )}
 
+      {/* Bulk Share Modal */}
+      {bulkShareModal && (
+        <BulkShareModal
+          isOpen={true}
+          onClose={() => setBulkShareModal(null)}
+          fileIds={bulkShareModal.fileIds}
+          fileNames={bulkShareModal.fileNames}
+          onSuccess={clearSelection}
+        />
+      )}
+
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
@@ -790,6 +927,41 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger, sear
             </div>
           </div>
         </div>
+        
+        {/* Bulk Actions Toolbar */}
+        {showBulkActions && (
+          <div className="px-8 py-4 bg-blue-50 border-b border-blue-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <span className="text-sm font-medium text-blue-700">
+                  {selectedFiles.size} file{selectedFiles.size !== 1 ? 's' : ''} selected
+                </span>
+                <button
+                  onClick={clearSelection}
+                  className="text-sm text-blue-600 hover:text-blue-800 underline"
+                >
+                  Clear selection
+                </button>
+              </div>
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={handleBulkShare}
+                  className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                >
+                  <ShareIcon className="h-4 w-4 mr-2" />
+                  Share
+                </button>
+                <button
+                  onClick={handleBulkDownload}
+                  className="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors duration-200"
+                >
+                  <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
+                  Download
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         
         {/* File content */}
         {viewMode === 'grid' ? <GridView /> : <ListView />}

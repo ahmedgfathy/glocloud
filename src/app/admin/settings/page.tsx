@@ -294,7 +294,7 @@ export default function SettingsPage() {
                             type="number"
                             value={settings.maxFileSize}
                             onChange={(e) => setSettings({...settings, maxFileSize: e.target.value})}
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-gray-900 bg-white"
                           />
                         </div>
                         <div>
@@ -305,7 +305,7 @@ export default function SettingsPage() {
                             type="number"
                             value={settings.maxStoragePerUser}
                             onChange={(e) => setSettings({...settings, maxStoragePerUser: e.target.value})}
-                            className="w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                            className="w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-gray-900 bg-white"
                           />
                         </div>
                       </div>
@@ -317,7 +317,7 @@ export default function SettingsPage() {
                           value={settings.allowedFileTypes}
                           onChange={(e) => setSettings({...settings, allowedFileTypes: e.target.value})}
                           rows={3}
-                          className="w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                          className="w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-gray-900 bg-white"
                         />
                       </div>
                     </div>
@@ -365,7 +365,7 @@ export default function SettingsPage() {
                           type="number"
                           value={settings.sessionTimeout}
                           onChange={(e) => setSettings({...settings, sessionTimeout: e.target.value})}
-                          className="w-full sm:w-48 px-4 py-3 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                          className="w-full sm:w-48 px-4 py-3 border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 text-gray-900 bg-white"
                         />
                       </div>
                     </div>
@@ -468,7 +468,7 @@ export default function SettingsPage() {
                           type="text"
                           value={companyName}
                           onChange={(e) => setCompanyName(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
                           required
                         />
                       </div>
@@ -517,7 +517,7 @@ export default function SettingsPage() {
                             type="text"
                             value={primaryColor}
                             onChange={(e) => setPrimaryColor(e.target.value)}
-                            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
                           />
                         </div>
                       </div>
@@ -537,7 +537,7 @@ export default function SettingsPage() {
                             type="text"
                             value={secondaryColor}
                             onChange={(e) => setSecondaryColor(e.target.value)}
-                            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
                           />
                         </div>
                       </div>
@@ -561,7 +561,7 @@ export default function SettingsPage() {
                           type="email"
                           value={contactEmail}
                           onChange={(e) => setContactEmail(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
                         />
                       </div>
 
@@ -574,7 +574,7 @@ export default function SettingsPage() {
                           type="tel"
                           value={contactPhone}
                           onChange={(e) => setContactPhone(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
                         />
                       </div>
 
@@ -587,7 +587,7 @@ export default function SettingsPage() {
                           type="url"
                           value={website}
                           onChange={(e) => setWebsite(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
                           placeholder="https://example.com"
                         />
                       </div>
@@ -601,7 +601,7 @@ export default function SettingsPage() {
                           type="text"
                           value={address}
                           onChange={(e) => setAddress(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
                         />
                       </div>
 
@@ -614,7 +614,7 @@ export default function SettingsPage() {
                           value={description}
                           onChange={(e) => setDescription(e.target.value)}
                           rows={4}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 bg-white"
                           placeholder="Brief description of your company..."
                         />
                       </div>

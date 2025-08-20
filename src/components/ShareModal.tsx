@@ -356,7 +356,7 @@ export default function ShareModal({ isOpen, onClose, fileId, fileName }: ShareM
                     <div key={share.id} className="flex items-center justify-between bg-gray-50 p-3 rounded-md">
                       <div className="flex-1 pr-4">
                         <div className="flex items-center space-x-2 mb-2">
-                          <div className="flex-1 bg-white border rounded px-3 py-2 font-mono text-sm break-all">
+                          <div className="flex-1 bg-white border rounded px-3 py-2 font-mono text-sm text-gray-900 break-all">
                             {share.shareUrl}
                           </div>
                           {share.hasPassword && (

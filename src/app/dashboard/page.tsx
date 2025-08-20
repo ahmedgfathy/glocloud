@@ -78,14 +78,21 @@ export default function Dashboard() {
 
   const fetchUserStats = async () => {
     try {
-      const response = await fetch('/api/files')
-      if (response.ok) {
-        const data = await response.json()
-        const files = data.files || []
+      const [filesResponse, sharedResponse] = await Promise.all([
+        fetch('/api/files'),
+        fetch('/api/files/shared')
+      ])
+      
+      let totalFiles = 0
+      let storageUsed = 0
+      let sharedFiles = 0
+      
+      if (filesResponse.ok) {
+        const filesData = await filesResponse.json()
+        const files = filesData.files || []
         
-        const totalFiles = files.length
-        const storageUsed = files.reduce((total: number, file: any) => total + (file.size || 0), 0)
-        const sharedFiles = 0
+        totalFiles = files.length
+        storageUsed = files.reduce((total: number, file: any) => total + (file.size || 0), 0)
         
         // Calculate file type statistics
         const fileTypeStats = {
@@ -115,14 +122,19 @@ export default function Dashboard() {
           }
         })
         
-        setUserStats({
-          totalFiles,
-          storageUsed,
-          sharedFiles
-        })
-        
         setFileTypeStats(fileTypeStats)
       }
+      
+      if (sharedResponse.ok) {
+        const sharedData = await sharedResponse.json()
+        sharedFiles = sharedData.length || 0
+      }
+      
+      setUserStats({
+        totalFiles,
+        storageUsed,
+        sharedFiles
+      })
     } catch (error) {
       console.error('Error fetching user stats:', error)
     } finally {
@@ -239,63 +251,131 @@ export default function Dashboard() {
       <main className="flex-1 ml-64 flex flex-col h-screen">
         <div className="flex-1 overflow-y-auto content-scrollable p-8">
           <div className="max-w-7xl mx-auto">
-            <div className="mb-6">
-              <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
-                <div className="flex items-center space-x-4 mb-4">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-                    <span className="text-white font-bold text-2xl">
-                      {session?.user?.name?.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                  <div>
-                    <h1 className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                      Welcome back, {session?.user?.name}
-                    </h1>
-                    <p className="text-gray-600 text-lg">
-                      Manage your files and folders securely
-                    </p>
-                  </div>
+            <div className="mb-8">
+              <div className="relative overflow-hidden bg-gradient-to-br from-white via-blue-50 to-purple-50 rounded-3xl shadow-2xl border border-white/20 backdrop-blur-sm">
+                {/* Animated Background Elements */}
+                <div className="absolute inset-0 overflow-hidden">
+                  <div className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full animate-float"></div>
+                  <div className="absolute top-1/2 -left-8 w-32 h-32 bg-gradient-to-br from-purple-400/10 to-pink-400/10 rounded-full animate-float" style={{animationDelay: '1s'}}></div>
+                  <div className="absolute bottom-4 right-1/3 w-16 h-16 bg-gradient-to-br from-blue-400/15 to-cyan-400/15 rounded-full animate-float" style={{animationDelay: '2s'}}></div>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-blue-600 text-sm font-medium">Total Files</p>
-                        <p className="text-2xl font-bold text-blue-700">
-                          {statsLoading ? '...' : userStats.totalFiles}
-                        </p>
+                <div className="relative p-8">
+                  <div className="flex items-center space-x-6 mb-6">
+                    <div className="relative group">
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="relative w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl transform group-hover:scale-105 transition-transform duration-300">
+                        <span className="text-white font-bold text-3xl animate-scale-in">
+                          {session?.user?.name?.charAt(0).toUpperCase()}
+                        </span>
                       </div>
-                      <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
-                        <FolderIcon className="h-6 w-6 text-white" />
+                    </div>
+                    <div className="flex-1">
+                      <h1 className="text-4xl font-bold mb-2 animate-slide-in-right">
+                        <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent">
+                          Welcome back, {session?.user?.name}
+                        </span>
+                      </h1>
+                      <p className="text-gray-600 text-lg flex items-center animate-slide-in-right" style={{animationDelay: '0.2s'}}>
+                        <CloudIcon className="h-5 w-5 mr-2 text-blue-500" />
+                        Manage your files and folders securely in the cloud
+                      </p>
+                      <div className="flex items-center mt-3 space-x-4 animate-slide-in-right" style={{animationDelay: '0.4s'}}>
+                        <div className="flex items-center text-sm text-gray-500">
+                          <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+                          System Online
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          Last login: {new Date().toLocaleDateString('en-EG', {
+                            timeZone: 'Africa/Cairo',
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="hidden md:block animate-fade-in" style={{animationDelay: '0.6s'}}>
+                      <div className="text-right">
+                        <div className="text-sm text-gray-500 mb-1">Role</div>
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-blue-100 to-purple-100 text-blue-800 border border-blue-200">
+                          {session?.user?.role?.replace('_', ' ')}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+                  <div className="group relative overflow-hidden bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 hover:scale-105">
+                    <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 to-transparent"></div>
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-12 translate-x-12 group-hover:scale-150 transition-transform duration-700"></div>
+                    <div className="relative p-6">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                          <FolderIcon className="h-6 w-6 text-white" />
+                        </div>
+                        <div className="text-white/80 text-xs font-medium">Total Files</div>
+                      </div>
+                      <div className="text-3xl font-bold text-white mb-1">
+                        {statsLoading ? (
+                          <div className="h-8 bg-white/20 rounded animate-pulse"></div>
+                        ) : (
+                          <span className="block animate-fade-in">{userStats.totalFiles}</span>
+                        )}
+                      </div>
+                      <p className="text-white/80 text-sm">Files in storage</p>
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
+                        <div className="h-full bg-white/40 rounded-full animate-pulse"></div>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border border-green-200">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-green-600 text-sm font-medium">Storage Used</p>
-                        <p className="text-2xl font-bold text-green-700">
-                          {statsLoading ? '...' : formatFileSize(userStats.storageUsed)}
-                        </p>
+                  <div className="group relative overflow-hidden bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 hover:scale-105">
+                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/20 to-transparent"></div>
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-12 translate-x-12 group-hover:scale-150 transition-transform duration-700"></div>
+                    <div className="relative p-6">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                          <CloudIcon className="h-6 w-6 text-white" />
+                        </div>
+                        <div className="text-white/80 text-xs font-medium">Storage Used</div>
                       </div>
-                      <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
-                        <CloudIcon className="h-6 w-6 text-white" />
+                      <div className="text-3xl font-bold text-white mb-1">
+                        {statsLoading ? (
+                          <div className="h-8 bg-white/20 rounded animate-pulse"></div>
+                        ) : (
+                          <span className="block animate-fade-in">{formatFileSize(userStats.storageUsed)}</span>
+                        )}
+                      </div>
+                      <p className="text-white/80 text-sm">Space utilized</p>
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
+                        <div className="h-full bg-white/40 rounded-full animate-pulse"></div>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 border border-purple-200">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-purple-600 text-sm font-medium">Shared Files</p>
-                        <p className="text-2xl font-bold text-purple-700">
-                          {statsLoading ? '...' : userStats.sharedFiles}
-                        </p>
+                  <div className="group relative overflow-hidden bg-gradient-to-br from-purple-500 to-purple-700 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 hover:scale-105">
+                    <div className="absolute inset-0 bg-gradient-to-br from-purple-400/20 to-transparent"></div>
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-12 translate-x-12 group-hover:scale-150 transition-transform duration-700"></div>
+                    <div className="relative p-6">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                          <ShareIcon className="h-6 w-6 text-white" />
+                        </div>
+                        <div className="text-white/80 text-xs font-medium">Shared Files</div>
                       </div>
-                      <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
-                        <ShareIcon className="h-6 w-6 text-white" />
+                      <div className="text-3xl font-bold text-white mb-1">
+                        {statsLoading ? (
+                          <div className="h-8 bg-white/20 rounded animate-pulse"></div>
+                        ) : (
+                          <span className="block animate-fade-in">{userStats.sharedFiles}</span>
+                        )}
+                      </div>
+                      <p className="text-white/80 text-sm">Shared with you</p>
+                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/20">
+                        <div className="h-full bg-white/40 rounded-full animate-pulse"></div>
                       </div>
                     </div>
                   </div>
@@ -486,6 +566,7 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
+        </div>
         </div>
         
       </main>
