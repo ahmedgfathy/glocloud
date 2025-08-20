@@ -250,8 +250,9 @@ export default function Dashboard() {
       <Sidebar />
       <main className="flex-1 ml-64 flex flex-col h-screen">
         <div className="flex-1 overflow-y-auto content-scrollable p-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="mb-8">
+          <div className="max-w-7xl mx-auto space-y-8">
+            {/* Welcome Section */}
+            <div className="mb-10 animate-fade-in">
               <div className="relative overflow-hidden bg-gradient-to-br from-white via-blue-50 to-purple-50 rounded-3xl shadow-2xl border border-white/20 backdrop-blur-sm">
                 {/* Animated Background Elements */}
                 <div className="absolute inset-0 overflow-hidden">
@@ -383,9 +384,10 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12">
               {/* Left Column */}
-              <div className="lg:col-span-1 space-y-6">
+              <div className="lg:col-span-1 space-y-8">
                 {/* Upload Files Card */}
                 <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
                   <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6">
@@ -427,7 +429,7 @@ export default function Dashboard() {
               </div>
 
               {/* Right Column */}
-              <div className="lg:col-span-1 space-y-6">
+              <div className="lg:col-span-1 space-y-8">
                 {/* Quick Actions Card */}
                 <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
                   <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-6">

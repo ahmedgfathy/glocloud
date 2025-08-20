@@ -86,7 +86,7 @@ export async function GET(request: NextRequest) {
       weeks: Object.entries(weeks).map(([weekKey, weekFiles]) => ({
         weekNumber: parseInt(weekKey.replace('week-', '')),
         weekKey,
-        files: weekFiles,
+        files: weekFiles.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()), // Sort files by newest first within each week
         fileCount: weekFiles.length,
         totalSize: weekFiles.reduce((sum, f) => sum + f.size, 0)
       })).sort((a, b) => b.weekNumber - a.weekNumber) // Latest weeks first
