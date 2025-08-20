@@ -85,7 +85,7 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger, sear
     })
   }
 
-  // Filter files based on search term and file type
+  // Filter and sort files based on search term and file type
   const filteredFiles = useMemo(() => {
     return files.filter(file => {
       try {
@@ -158,6 +158,9 @@ export default function FileList({ parentId, onFolderClick, refreshTrigger, sear
         console.error('Error filtering file:', error)
         return true // Include file if there's an error to avoid breaking the UI
       }
+    }).sort((a, b) => {
+      // Sort by creation date, newest first (last input, first output)
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     })
   }, [files, searchTerm, fileTypeFilter])
 
