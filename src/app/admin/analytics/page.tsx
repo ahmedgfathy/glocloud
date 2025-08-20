@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
-import { ChartBarIcon, UsersIcon, DocumentIcon, ShareIcon } from '@heroicons/react/24/outline'
+import { ChartBarIcon, UsersIcon, DocumentIcon, ShareIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 import Sidebar from '@/components/Sidebar'
 import {
   Chart as ChartJS,
@@ -43,6 +43,7 @@ export default function AnalyticsPage() {
   const { data: session, status } = useSession()
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState('')
 
   useEffect(() => {
     if (status === 'authenticated') {
@@ -63,6 +64,30 @@ export default function AnalyticsPage() {
       setLoading(false)
     }
   }
+
+  // Filter activities based on search term
+  const filteredActivities = analytics?.recentActivities?.filter(activity => {
+    if (!searchTerm) return true
+    
+    const searchLower = searchTerm.toLowerCase()
+    
+    // Search by user name
+    if (activity.user?.name?.toLowerCase().includes(searchLower)) return true
+    
+    // Search by user email
+    if (activity.user?.email?.toLowerCase().includes(searchLower)) return true
+    
+    // Search by employee ID
+    if (activity.user?.employeeId?.toLowerCase().includes(searchLower)) return true
+    
+    // Search by activity details (includes login activities)
+    if (activity.details?.toLowerCase().includes(searchLower)) return true
+    
+    // Search by IP address
+    if (activity.ipAddress?.toLowerCase().includes(searchLower)) return true
+    
+    return false
+  }) || []
 
   if (status === 'loading' || loading) {
     return (
@@ -367,15 +392,61 @@ export default function AnalyticsPage() {
             {/* Recent Activities */}
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200">
               <div className="p-8">
-                <h3 className="text-xl font-bold text-gray-900 mb-6">Recent Activities</h3>
+                <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200 mb-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <h3 className="text-xl font-bold text-gray-900 mb-4 md:mb-0">Recent Activities</h3>
+                    <div className="relative">
+                      <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                      <input
+                        type="text"
+                        placeholder="Search by name, email, employee ID, or activity..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent shadow-sm text-sm text-gray-900 bg-white"
+                      />
+                    </div>
+                  </div>
+                  {/* Results Summary */}
+                  {searchTerm && (
+                    <div className="mt-4 text-sm text-gray-600 flex items-center flex-wrap gap-2">
+                      <span>
+                        Showing {filteredActivities.length} activities matching
+                        <span className="font-medium text-purple-600 mx-1">{searchTerm}</span>
+                      </span>
+                      <button
+                        onClick={() => setSearchTerm('')}
+                        className="px-3 py-1 bg-purple-100 text-purple-800 rounded-lg hover:bg-purple-200 text-xs font-medium"
+                      >
+                        Clear
+                      </button>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Activity Results Info */}
+                {searchTerm && (
+                  <div className="mb-4">
+                    <div className="inline-flex items-center px-3 py-1 rounded-full text-sm bg-purple-100 text-purple-800 border border-purple-200">
+                      <MagnifyingGlassIcon className="h-4 w-4 mr-2" />
+                      {filteredActivities.length} results for "{searchTerm}"
+                      <button
+                        onClick={() => setSearchTerm('')}
+                        className="ml-2 hover:text-purple-600 text-lg font-semibold"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  </div>
+                )}
+                
                 <div className="max-h-96 overflow-y-auto content-scrollable">
-                  {analytics?.recentActivities?.length ? (
+                  {filteredActivities?.length ? (
                     <div className="flow-root">
                       <ul className="-mb-8">
-                        {analytics.recentActivities.map((activity, activityIdx) => (
+                        {filteredActivities.map((activity, activityIdx) => (
                           <li key={activity.id}>
                             <div className="relative pb-8">
-                              {activityIdx !== analytics.recentActivities.length - 1 ? (
+                              {activityIdx !== filteredActivities.length - 1 ? (
                                 <span
                                   className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200"
                                   aria-hidden="true"
@@ -394,6 +465,16 @@ export default function AnalyticsPage() {
                                     </p>
                                     <div className="mt-1 flex items-center space-x-4 text-xs text-gray-500">
                                       <span className="font-medium">User: {activity.user?.name || 'Unknown'}</span>
+                                      {activity.user?.email && (
+                                        <span className="text-blue-600 font-medium">
+                                          {activity.user.email}
+                                        </span>
+                                      )}
+                                      {activity.user?.employeeId && (
+                                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
+                                          EMP: {activity.user.employeeId}
+                                        </span>
+                                      )}
                                       {activity.ipAddress && activity.ipAddress !== 'unknown' && (
                                         <span className="bg-gray-100 px-2 py-1 rounded text-xs font-mono">
                                           IP: {activity.ipAddress}
@@ -424,6 +505,20 @@ export default function AnalyticsPage() {
                           </li>
                         ))}
                       </ul>
+                    </div>
+                  ) : searchTerm ? (
+                    <div className="text-center py-12">
+                      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <MagnifyingGlassIcon className="h-8 w-8 text-gray-400" />
+                      </div>
+                      <p className="text-gray-500 text-lg">No activities found</p>
+                      <p className="text-gray-400 text-sm">No activities match your search criteria</p>
+                      <button
+                        onClick={() => setSearchTerm('')}
+                        className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
+                      >
+                        Clear Search
+                      </button>
                     </div>
                   ) : (
                     <div className="text-center py-12">
