@@ -3,7 +3,9 @@ import { SessionProvider } from './providers/SessionProvider'
 import Footer from '@/components/Footer'
 import DynamicFavicon from '@/components/DynamicFavicon'
 import SecurityWarning from '@/components/SecurityWarning'
+import ChunkErrorBoundary from '@/components/ChunkErrorBoundary'
 import { prisma } from '@/lib/prisma'
+import '@/lib/chunkErrorHandler' // Global chunk error handling
 import "./globals.css";
 
 // Dynamic metadata generation
@@ -40,11 +42,13 @@ export default function RootLayout({
       <body className="h-screen overflow-hidden">
         <DynamicFavicon />
         <SecurityWarning />
-        <SessionProvider>
-          <div className="h-full">
-            {children}
-          </div>
-        </SessionProvider>
+        <ChunkErrorBoundary>
+          <SessionProvider>
+            <div className="h-full">
+              {children}
+            </div>
+          </SessionProvider>
+        </ChunkErrorBoundary>
       </body>
     </html>
   );

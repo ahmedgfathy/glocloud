@@ -1,13 +1,27 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: ['localhost'],
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '3001',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+    ],
   },
-  // Fix webpack chunk loading issues
+  // Enhanced webpack configuration to fix chunk loading issues
   webpack: (config, { dev, isServer }) => {
     if (dev && !isServer) {
+      // Optimize chunk splitting for development
       config.optimization.splitChunks = {
         chunks: 'all',
+        maxInitialRequests: 20,
+        maxAsyncRequests: 20,
         cacheGroups: {
           default: {
             minChunks: 1,
@@ -20,14 +34,31 @@ const nextConfig = {
             priority: -10,
             chunks: 'all',
           },
+          commons: {
+            name: 'commons',
+            minChunks: 2,
+            priority: -5,
+            reuseExistingChunk: true,
+          },
         },
       }
+      
+      // Add fallback for failed chunk loading
+      config.output.chunkLoadingGlobal = 'webpackChunkLoad'
+      config.output.globalObject = 'globalThis'
     }
+    
     return config
   },
-  // Add experimental features to reduce chunk errors
+  // Experimental features to improve stability
   experimental: {
     optimizeCss: false,
+    turbo: false, // Disable turbopack to avoid conflicts
+  },
+  // Enhanced error handling
+  onDemandEntries: {
+    maxInactiveAge: 60 * 1000,
+    pagesBufferLength: 5,
   },
   // Disable source maps in development to reduce chunk size
   productionBrowserSourceMaps: false,
