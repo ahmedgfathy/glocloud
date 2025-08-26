@@ -53,7 +53,6 @@ const nextConfig = {
   // Experimental features to improve stability
   experimental: {
     optimizeCss: false,
-    turbo: false, // Disable turbopack to avoid conflicts
   },
   // Enhanced error handling
   onDemandEntries: {

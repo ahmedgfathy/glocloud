@@ -8,29 +8,14 @@ import { prisma } from '@/lib/prisma'
 import '@/lib/chunkErrorHandler' // Global chunk error handling
 import "./globals.css";
 
-// Dynamic metadata generation
-export async function generateMetadata(): Promise<Metadata> {
-  try {
-    const settings = await prisma.companySettings.findFirst();
-    const companyName = settings?.companyName || 'PM Cloud';
-    
-    return {
-      title: `${companyName} - Cloud Storage System`,
-      description: "Secure cloud storage and file sharing for your business",
-      icons: {
-        icon: '/api/favicon',
-      },
-    };
-  } catch (error) {
-    return {
-      title: "PM Cloud - Cloud Storage System",
-      description: "Secure cloud storage and file sharing for your business",
-      icons: {
-        icon: '/api/favicon',
-      },
-    };
-  }
-}
+// Static metadata - database calls during build time cause issues
+export const metadata: Metadata = {
+  title: "PM Cloud - Cloud Storage System",
+  description: "Secure cloud storage and file sharing for your business",
+  icons: {
+    icon: '/api/favicon',
+  },
+};
 
 export default function RootLayout({
   children,
