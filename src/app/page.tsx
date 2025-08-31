@@ -99,7 +99,7 @@ export default function Home() {
             Welcome to {companySettings.companyName}
           </h1>
           <p className="text-xl text-gray-600 mb-8 animate-slide-in-up" style={{animationDelay: '0.2s'}}>
-            Secure cloud storage and file sharing for your business
+            Professional cloud storage and document management for real estate excellence
           </p>
           <div className="flex justify-center space-x-4 animate-slide-in-up" style={{animationDelay: '0.4s'}}>
             <Link
@@ -122,9 +122,9 @@ export default function Home() {
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                 <CloudIcon className="h-8 w-8 text-white" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Secure File Storage</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Property Documents</h3>
               <p className="text-gray-600 leading-relaxed">
-                Store your files securely in the cloud with advanced encryption and access controls.
+                Securely store property documents, contracts, and client files with advanced encryption and access controls.
               </p>
             </div>
             <div className="group bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border border-white/50">
@@ -133,9 +133,9 @@ export default function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Easy File Sharing</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Client Collaboration</h3>
               <p className="text-gray-600 leading-relaxed">
-                Share files and folders with team members and external users with customizable permissions.
+                Share property portfolios and documents with clients and partners with customizable permissions.
               </p>
             </div>
             <div className="group bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 border border-white/50">
@@ -144,9 +144,9 @@ export default function Home() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Admin Control</h3>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">Team Management</h3>
               <p className="text-gray-600 leading-relaxed">
-                Comprehensive admin panel to manage users, monitor activities, and control system settings.
+                Comprehensive admin panel to manage real estate team members, monitor activities, and control system access.
               </p>
             </div>
           </div>
