@@ -13,6 +13,7 @@ interface CompanySettings {
 }
 
 export default function Home() {
+  // Test deployment workflow - August 31, 2025
   const { data: session, status } = useSession()
   const router = useRouter()
   const [companySettings, setCompanySettings] = useState<CompanySettings>({
