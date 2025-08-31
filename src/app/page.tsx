@@ -16,8 +16,8 @@ export default function Home() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [companySettings, setCompanySettings] = useState<CompanySettings>({
-    companyName: 'PMS Cloud',
-    companyLogo: null
+    companyName: 'Glomart Real Estates',
+    companyLogo: '/logo-glomart.png'
   })
 
   useEffect(() => {

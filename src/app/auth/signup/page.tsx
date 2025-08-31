@@ -21,8 +21,8 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const [companySettings, setCompanySettings] = useState<CompanySettings>({
-    companyName: 'PMS Cloud',
-    companyLogo: null
+    companyName: 'Glomart Real Estates',
+    companyLogo: '/logo-glomart.png'
   })
 
   useEffect(() => {

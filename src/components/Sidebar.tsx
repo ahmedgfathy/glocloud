@@ -27,8 +27,8 @@ export default function Sidebar() {
   const isAdmin = session?.user?.role === 'SUPER_ADMIN' || session?.user?.role === 'ADMIN'
   
   const [companySettings, setCompanySettings] = useState<CompanySettings>({
-    companyName: 'Glo Cloud',
-    companyLogo: null
+    companyName: 'Glomart Real Estates',
+    companyLogo: '/logo-glomart.png'
   })
 
   useEffect(() => {

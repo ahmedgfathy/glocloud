@@ -10,8 +10,8 @@ import "./globals.css";
 
 // Static metadata - database calls during build time cause issues
 export const metadata: Metadata = {
-  title: "Glo Cloud - Cloud Storage System",
-  description: "Secure cloud storage and file sharing for your business",
+  title: "Glomart Real Estates - Cloud Storage System",
+  description: "Secure cloud storage and file sharing for Glomart Real Estates",
   icons: {
     icon: '/api/favicon',
   },

@@ -1,15 +1,15 @@
 <!-- Banner with Logo -->
 <div align="center">
-  <img src="https://github.com/ahmedgfathy/glocloud/raw/main/public/logo.svg" alt="Glo Cloud Logo" width="120" height="120">
+  <img src="https://github.com/ahmedgfathy/glocloud/raw/main/public/logo-glomart.png" alt="Glomart Real Estates Logo" width="200" height="120">
   
-  # 🚀 Glo Cloud - Enterprise File Management System
+  # 🏢 Glomart Real Estates - Cloud Storage System
   
   <p align="center">
-    <b>🌟 The Ultimate Cloud Storage Solution for Modern Businesses 🌟</b>
+    <b>🌟 Professional File Management for Real Estate Excellence 🌟</b>
   </p>
   
   <p align="center">
-    A comprehensive, secure, and scalable cloud storage platform built with Next.js and MariaDB
+    A comprehensive, secure, and scalable cloud storage platform built with Next.js and MariaDB for Glomart Real Estates
   </p>
 
   <!-- Badges -->
