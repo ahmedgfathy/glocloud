@@ -13,7 +13,8 @@ import {
   UserGroupIcon,
   ChartBarIcon,
   ArrowRightOnRectangleIcon,
-  CloudIcon
+  CloudIcon,
+  EnvelopeIcon
 } from '@heroicons/react/24/outline'
 
 interface CompanySettings {
@@ -57,6 +58,7 @@ export default function Sidebar() {
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
     { name: 'My Files', href: '/dashboard/files', icon: FolderIcon },
     { name: 'Shared with Me', href: '/dashboard/shared', icon: ShareIcon },
+    { name: 'Email', href: 'https://mail.glomartrealestates.com', icon: EnvelopeIcon, external: true },
   ]
 
   const adminNavigation = [
@@ -148,24 +150,43 @@ export default function Sidebar() {
         <nav className="flex-1 px-6 space-y-1 overflow-y-auto">
           {/* Main Navigation */}
           <div className="space-y-1">
-            {navigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                  isActive(item.href)
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
-                }`}
-              >
-                <item.icon className={`mr-3 h-5 w-5 ${
-                  isActive(item.href)
-                    ? 'text-white'
-                    : 'text-gray-400 group-hover:text-gray-600'
-                }`} />
-                {item.name}
-              </Link>
-            ))}
+            {navigation.map((item) => {
+              if (item.external) {
+                return (
+                  <a
+                    key={item.name}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                  >
+                    <item.icon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-600" />
+                    {item.name}
+                    <svg className="ml-auto h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                )
+              }
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                    isActive(item.href)
+                      ? 'bg-blue-600 text-white'
+                      : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
+                >
+                  <item.icon className={`mr-3 h-5 w-5 ${
+                    isActive(item.href)
+                      ? 'text-white'
+                      : 'text-gray-400 group-hover:text-gray-600'
+                  }`} />
+                  {item.name}
+                </Link>
+              )
+            })}
           </div>
           
           {/* Admin Navigation */}
