@@ -122,7 +122,7 @@ export async function POST(
             })
 
             // Add files to archive
-            folderFiles.forEach(file => {
+            folderFiles.forEach((file: any) => {
               const filePath = path.join(process.cwd(), file.path)
               if (fs.existsSync(filePath) && !file.isFolder) {
                 archive.file(filePath, { name: file.originalName })
