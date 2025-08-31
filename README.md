@@ -1,8 +1,8 @@
 <!-- Banner with Logo -->
 <div align="center">
-  <img src="https://github.com/ahmedgfathy/pmcloud/raw/main/public/logo.svg" alt="PM Cloud Logo" width="120" height="120">
+  <img src="https://github.com/ahmedgfathy/glocloud/raw/main/public/logo.svg" alt="Glo Cloud Logo" width="120" height="120">
   
-  # 🚀 PM Cloud - Enterprise File Management System
+  # 🚀 Glo Cloud - Enterprise File Management System
   
   <p align="center">
     <b>🌟 The Ultimate Cloud Storage Solution for Modern Businesses 🌟</b>
@@ -22,9 +22,9 @@
   </p>
 
   <p align="center">
-    <img src="https://img.shields.io/github/license/ahmedgfathy/pmcloud?style=for-the-badge" alt="License">
-    <img src="https://img.shields.io/github/stars/ahmedgfathy/pmcloud?style=for-the-badge" alt="Stars">
-    <img src="https://img.shields.io/github/forks/ahmedgfathy/pmcloud?style=for-the-badge" alt="Forks">
+    <img src="https://img.shields.io/github/license/ahmedgfathy/glocloud?style=for-the-badge" alt="License">
+    <img src="https://img.shields.io/github/stars/ahmedgfathy/glocloud?style=for-the-badge" alt="Stars">
+    <img src="https://img.shields.io/github/forks/ahmedgfathy/glocloud?style=for-the-badge" alt="Forks">
   </p>
 </div>
 
@@ -149,8 +149,8 @@
 
 1. **📥 Clone the repository**
    ```bash
-   git clone https://github.com/ahmedgfathy/pmcloud.git
-   cd pmcloud
+   git clone https://github.com/ahmedgfathy/glocloud.git
+   cd glocloud
    ```
 
 2. **📦 Install dependencies**
@@ -166,7 +166,7 @@
    Edit `.env.local` with your configuration:
    ```env
    # Database Configuration
-   DATABASE_URL="mysql://root:password@localhost:3306/pm_cloud"
+   DATABASE_URL="mysql://root:password@localhost:3306/glo_cloud"
    
    # NextAuth Configuration
    NEXTAUTH_URL="http://localhost:3000"
@@ -218,7 +218,7 @@
 
 ### 🏢 Company Branding Setup
 
-PM Cloud supports full company branding customization:
+Glo Cloud supports full company branding customization:
 
 1. **🔑 Login as Super Admin** using the credentials from your `.env` file
 2. **⚙️ Navigate to Admin → Company Settings**
@@ -249,7 +249,7 @@ SUPER_ADMIN_NAME="CEO Full Name"
 ## 📁 Project Structure
 
 ```
-pmcloud/
+glocloud/
 ├── 🎨 src/
 │   ├── 📱 app/                     # Next.js App Router pages
 │   │   ├── 🔌 api/                # API routes
@@ -455,17 +455,17 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
   <table>
     <tr>
       <td align="center">
-        <a href="https://github.com/ahmedgfathy/pmcloud/issues">
+        <a href="https://github.com/ahmedgfathy/glocloud/issues">
           <img src="https://img.shields.io/badge/🐛_Report_Bug-GitHub_Issues-red?style=for-the-badge" alt="Report Bug">
         </a>
       </td>
       <td align="center">
-        <a href="https://github.com/ahmedgfathy/pmcloud/discussions">
+        <a href="https://github.com/ahmedgfathy/glocloud/discussions">
           <img src="https://img.shields.io/badge/💬_Discussions-GitHub-blue?style=for-the-badge" alt="Discussions">
         </a>
       </td>
       <td align="center">
-        <a href="mailto:admin@pmcloud.com">
+        <a href="mailto:admin@glocloud.com">
           <img src="https://img.shields.io/badge/📧_Contact-Email-green?style=for-the-badge" alt="Email">
         </a>
       </td>
@@ -479,13 +479,13 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
   <h2>🌟 Star this repository if you find it helpful! 🌟</h2>
   
   <p>
-    <strong>PM Cloud</strong> - Enterprise-grade file management for the modern workplace
+    <strong>Glo Cloud</strong> - Enterprise-grade file management for the modern workplace
   </p>
   
   <p>
     Made with ❤️ by developers, for developers
   </p>
   
-  <img src="https://img.shields.io/github/last-commit/ahmedgfathy/pmcloud?style=for-the-badge" alt="Last Commit">
-  <img src="https://img.shields.io/github/commit-activity/m/ahmedgfathy/pmcloud?style=for-the-badge" alt="Commit Activity">
+  <img src="https://img.shields.io/github/last-commit/ahmedgfathy/glocloud?style=for-the-badge" alt="Last Commit">
+  <img src="https://img.shields.io/github/commit-activity/m/ahmedgfathy/glocloud?style=for-the-badge" alt="Commit Activity">
 </div>

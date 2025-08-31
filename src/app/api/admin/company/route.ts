@@ -20,7 +20,7 @@ export async function GET() {
       // Create default settings if none exist
       settings = await prisma.companySettings.create({
         data: {
-          companyName: 'PM Cloud',
+          companyName: 'Glo Cloud',
           primaryColor: '#2563eb',
           secondaryColor: '#1e40af',
           isConfigured: false,
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
     let settings = await prisma.companySettings.findFirst();
 
     const updateData = {
-      companyName: companyName || 'PM Cloud',
+      companyName: companyName || 'Glo Cloud',
       primaryColor: primaryColor || '#2563eb',
       secondaryColor: secondaryColor || '#1e40af',
       contactEmail: contactEmail || null,

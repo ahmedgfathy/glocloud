@@ -27,7 +27,7 @@ export default function Sidebar() {
   const isAdmin = session?.user?.role === 'SUPER_ADMIN' || session?.user?.role === 'ADMIN'
   
   const [companySettings, setCompanySettings] = useState<CompanySettings>({
-    companyName: 'PM Cloud',
+    companyName: 'Glo Cloud',
     companyLogo: null
   })
 

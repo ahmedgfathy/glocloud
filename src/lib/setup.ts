@@ -55,7 +55,7 @@ export async function createDefaultCompanySettings() {
 
     const defaultSettings = await prisma.companySettings.create({
       data: {
-        companyName: 'PM Cloud',
+        companyName: 'Glo Cloud',
         primaryColor: '#2563eb',
         secondaryColor: '#1e40af',
         isConfigured: false,

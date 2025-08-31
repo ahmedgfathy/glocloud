@@ -10,7 +10,7 @@ import "./globals.css";
 
 // Static metadata - database calls during build time cause issues
 export const metadata: Metadata = {
-  title: "PM Cloud - Cloud Storage System",
+  title: "Glo Cloud - Cloud Storage System",
   description: "Secure cloud storage and file sharing for your business",
   icons: {
     icon: '/api/favicon',

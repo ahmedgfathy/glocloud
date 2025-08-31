@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 async function setupApplication() {
   try {
-    console.log('🚀 Starting PM Cloud application setup...\n');
+    console.log('🚀 Starting Glo Cloud application setup...\n');
 
     // Create super admin
     console.log('👑 Setting up Super Admin...');
@@ -52,7 +52,7 @@ async function setupApplication() {
     } else {
       const defaultSettings = await prisma.companySettings.create({
         data: {
-          companyName: 'PM Cloud',
+          companyName: 'Glo Cloud',
           primaryColor: '#2563eb',
           secondaryColor: '#1e40af',
           isConfigured: false,

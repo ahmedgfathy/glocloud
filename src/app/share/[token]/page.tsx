@@ -354,7 +354,7 @@ export default function PublicSharePage() {
           {/* Footer */}
           <div className="text-center mt-8">
             <p className="text-gray-500 text-sm">
-              Powered by PM Cloud Storage System
+              Powered by Glo Cloud Storage System
             </p>
           </div>
         </div>

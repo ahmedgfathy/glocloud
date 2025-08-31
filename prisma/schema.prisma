@@ -120,7 +120,7 @@ model Notification {
 
 model CompanySettings {
   id              String   @id @default(cuid())
-  companyName     String   @default("PM Cloud")
+  companyName     String   @default("Glo Cloud")
   companyLogo     String?
   primaryColor    String   @default("#2563eb")
   secondaryColor  String   @default("#1e40af")

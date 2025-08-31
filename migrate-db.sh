@@ -1,5 +1,5 @@
 #!/bin/bash
-cd /home/xinreal/pmcloud
+cd /home/xinreal/glocloud
 export DATABASE_URL="mysql://root:zerocall@localhost:3306/pms_cloud"
 export NEXTAUTH_URL="http://localhost:3000"
 export NEXTAUTH_SECRET="super-secret-nextauth-key-change-in-production"
