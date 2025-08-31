@@ -248,7 +248,7 @@ export default function Dashboard() {
   return (
     <div className="h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex">
       <Sidebar />
-      <main className="flex-1 ml-64 flex flex-col h-screen">
+      <main className="flex-1 ml-64 flex flex-col h-screen pr-8">
         <div className="flex-1 overflow-y-auto content-scrollable p-8">
           <div className="max-w-7xl mx-auto space-y-8">
             {/* Welcome Section */}

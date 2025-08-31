@@ -60,7 +60,7 @@ export default function SharedFilesPage() {
         </div>
         
         <Sidebar />
-        <main className="flex-1 ml-64 flex flex-col h-screen relative z-10">
+        <main className="flex-1 ml-64 flex flex-col h-screen relative z-10 pr-8">
           <div className="flex-1 overflow-y-auto content-scrollable p-8 flex items-center justify-center">
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
           </div>
@@ -148,7 +148,7 @@ export default function SharedFilesPage() {
       </div>
       
       <Sidebar />
-      <main className="flex-1 ml-64 flex flex-col h-screen relative z-10">
+      <main className="flex-1 ml-64 flex flex-col h-screen relative z-10 pr-8">
         <div className="flex-1 overflow-y-auto content-scrollable p-8">
           <div className="max-w-7xl mx-auto space-y-8">
             {/* Enhanced Header */}
