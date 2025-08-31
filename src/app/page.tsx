@@ -13,7 +13,7 @@ interface CompanySettings {
 }
 
 export default function Home() {
-  // Test deployment workflow - August 31, 2025
+  // Test deployment workflow - GitHub Actions working! 🚀
   const { data: session, status } = useSession()
   const router = useRouter()
   const [companySettings, setCompanySettings] = useState<CompanySettings>({
