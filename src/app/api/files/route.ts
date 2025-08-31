@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     })
 
     // Add week number calculation for files with structured paths
-    const filesWithWeekInfo = files.map(file => ({
+    const filesWithWeekInfo = files.map((file: any) => ({
       ...file,
       weekNumber: file.uploadPath ? getWeekNumber(file.createdAt) : null
     }))

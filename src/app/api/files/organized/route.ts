@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
     // Organize files by employee and week
     const organizedFiles: { [employeeId: string]: { [week: string]: any[] } } = {}
 
-    files.forEach(file => {
+    files.forEach((file: any) => {
       const empId = file.owner.employeeId || file.owner.id
       const fileWeek = getWeekNumber(file.createdAt)
       
@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
     // Convert to array format for easier frontend handling
     const result = Object.entries(organizedFiles).map(([empId, weeks]) => ({
       employeeId: empId,
-      employee: files.find(f => (f.owner.employeeId || f.owner.id) === empId)?.owner,
+      employee: files.find((f: any) => (f.owner.employeeId || f.owner.id) === empId)?.owner,
       weeks: Object.entries(weeks).map(([weekKey, weekFiles]) => ({
         weekNumber: parseInt(weekKey.replace('week-', '')),
         weekKey,

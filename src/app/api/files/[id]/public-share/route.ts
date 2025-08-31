@@ -125,7 +125,7 @@ export async function GET(
       }
     })
 
-    const sharesWithUrls = publicShares.map(share => ({
+    const sharesWithUrls = publicShares.map((share: any) => ({
       id: share.id,
       token: share.token,
       shareUrl: `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/share/${share.token}`,
