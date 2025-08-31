@@ -1,0 +1,25 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 🚀 Deploy to server
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: 5.180.148.92
+        username: root
+        password: ${{ secrets.SERVER_PASSWORD }}
+        script: |
+          echo "🚀 Deploying from GitHub..."
+          cd /var/www/glocloud
+          git pull origin main
+          npm install
+          pm2 restart glocloud
+          echo "✅ Done! App: https://cloud.glomartrealestates.com"
